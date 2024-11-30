@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Platform</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Login Section -->
+        <div id="login-section">
+            <h1>Movie Platform</h1>
+            <form id="login-form">
+                <input type="text" id="username" placeholder="Username" required>
+                <input type="password" id="password" placeholder="Password" required>
+                <button type="submit">Login</button>
+            </form>
+            <p id="login-error"></p>
+        </div>
+
+        <!-- Main App Section -->
+        <div id="main-section" style="display: none;">
+            <h1>Welcome to the Movie Platform</h1>
+            <button id="logout-button">Logout</button>
+
+            <!-- Search Section -->
+            <div id="search-section">
+                <h2>Search for Movies</h2>
+                <form id="search-form">
+                    <input type="text" id="search-input" placeholder="Search for a movie" required>
+                    <button type="submit">Search</button>
+                </form>
+                <div id="search-results"></div>
+            </div>
+
+            <!-- User List Section -->
+            <div id="user-list-section">
+                <h2>Your Movie List</h2>
+                <button id="create-list-button">Create New List</button>
+                <ul id="movie-list"></ul>
+            </div>
+        </div>
+    </div>
+    <script src="./frontend.js"></script>
+</body>
+</html>

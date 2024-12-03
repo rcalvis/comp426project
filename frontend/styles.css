@@ -12,7 +12,6 @@ body {
   text-align: center;
 }
 
-/* Movie grid container */
 #section {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -20,9 +19,8 @@ body {
   padding: 20px;
 }
 
-/* Individual movie card styling */
 .card {
-  background-color: #1e1e1e; /* Dark background */
+  background-color: #1e1e1e; 
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   text-align: center;
@@ -31,19 +29,19 @@ body {
 }
 
 .card:hover {
-  transform: scale(1.05); /* Slight zoom on hover */
+  transform: scale(1.05);
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
 }
 
-/* Movie poster styling */
+
 .thumbnail {
   width: 100%;
   height: auto;
   object-fit: cover;
-  border-bottom: 2px solid #fff; /* Separator below image */
+  border-bottom: 2px solid #fff; 
 }
 
-/* Movie title styling */
+
 .card h3 {
   margin: 10px 0;
   font-size: 18px;
@@ -51,80 +49,134 @@ body {
 }
 
 
-/* Header container styling */
 .header-container {
   display: flex;
-  justify-content: space-between; /* Space between left and right */
-  align-items: center; /* Align items vertically */
+  justify-content: space-between; 
+  align-items: center; 
   padding: 10px 20px;
-  background-color: #131720; /* Match the dark theme */
+  background-color: #131720; 
   color: white;
   border-bottom: 2px solid #2c2c2c;
 }
 
-/* Website name styling (far left) */
 .website-name {
   font-size: 20px;
   font-weight: bold;
-  color: #007bff; /* Blue text */
+  color: #007bff; 
   margin: 0;
 }
 
 #main{
   font-size: xx-large;
 }
-/* Right container for search bar and logout button */
+
 .right-container {
   display: flex;
   align-items: center;
-  gap: 10px; /* Add spacing between the search bar and logout button */
+  gap: 10px; 
 }
 
-/* Search bar styling */
+
 #search-bar {
   padding: 8px;
-  border: 2px solid #007bff; /* Blue outline */
+  border: 2px solid #007bff; 
   border-radius: 5px;
   outline: none;
   font-size: 14px;
-  color: #007bff; /* Blue text */
-  background-color: #131720; /* Dark background */
+  color: #007bff; 
+  background-color: #131720; 
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 #search-bar:focus {
-  border-color: #0056b3; /* Darker blue on focus */
+  border-color: #0056b3; 
   box-shadow: 0 0 8px rgba(0, 123, 255, 0.6);
 }
 
 
 #search-button {
   padding: 8px 12px;
-  background-color: #131720; /* Dark background */
-  color: #007bff; /* Blue text */
-  border: 2px solid #007bff; /* Blue outline */
+  background-color: #131720; 
+  color: #007bff; 
+  border: 2px solid #007bff; 
   border-radius: 5px;
   cursor: pointer;
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 #search-button:hover {
-  background-color: #007bff; /* Blue background on hover */
-  color: white; /* White text */
+  background-color: #007bff;
+  color: white; 
 }
 
-/* Logout button styling */
 #logout-button {
   padding: 8px 12px;
-  background-color: #131720; /* Dark background */
-  color: #007bff; /* Blue text */
-  border: 2px solid #007bff; /* Blue outline */
+  background-color: #131720; 
+  color: #007bff; 
+  border: 2px solid #007bff; 
   border-radius: 5px;
   cursor: pointer;
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 #logout-button:hover {
-  background-color: #007bff; /* Blue background on hover */
-  color: white; /* White text */
+  background-color: #007bff;
+  color: white; 
+}
+
+
+.section-divider {
+  border: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.2); 
+  margin: 20px 0; 
+}
+
+
+.watchlist-title {
+  text-align: center; 
+  font-size: 24px;
+  color: white;
+  margin-bottom: 10px; 
+}
+
+
+.add-button {
+  display: block; 
+  margin: 0 auto 20px; 
+  font-size: 24px;
+  color: white;
+  background-color: rgba(255, 255, 255, 0.1); 
+  border: 2px solid rgba(255, 255, 255, 0.2); 
+  border-radius: 50%; 
+  width: 40px; 
+  height: 40px; 
+  cursor: pointer;
+  transition: all 0.3s ease; 
+}
+
+.add-button:hover {
+  background-color: rgba(255, 255, 255, 0.3); 
+  border-color: white; 
+}
+
+
+.watchlist {
+  list-style: none; 
+  padding: 0;
+  margin: 0;
+}
+
+.watchlist li {
+  color: white;
+  margin: 5px 0;
+  padding: 10px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 5px;
+}
+
+.placeholder-message {
+  font-size: 18px;
+  color: rgba(255, 255, 255, 0.7);
+  text-align: center;
+  margin-top: 20px;
 }

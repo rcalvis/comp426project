@@ -42,14 +42,27 @@
             </header>
 
             <div style="padding-left: 16px"></div>
-            <section id="section"></section>
+            <section id="section">
+                <p class="placeholder-message">Search for your favorite movies!</p>
+            </section>
 
             <!-- User List Section -->
             <div id="user-list-section">
-                <h2>Watchlist</h2>
-                <button id="create-list-button">Create New List</button>
-                <ul id="movie-list"></ul>
-            </div>
+                <!-- Horizontal divider -->
+                <hr class="section-divider" />
+                
+                <!-- Centered title -->
+                <h2 class="watchlist-title">Watchlist</h2>
+                
+                <!-- Add button -->
+                <button id="create-list-button" class="add-button" aria-label="Create New List">
+                  +
+                </button>
+                
+                <!-- Movie list -->
+                <ul id="movie-list" class="watchlist"></ul>
+              </div>
+              
         </div>
     </div>
     <script src="./frontend.js"></script>

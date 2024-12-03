@@ -77,6 +77,8 @@ app.post("/add-movie", (req, res) => {
     .json({ message: "Movie added to user list", list: req.session.user.list });
 });
 
+
+
 app.delete("/delete-movie", (req, res) => {
   if (!req.session.user || !req.session.user.list) {
     return res.status(400).json({ message: "No list found for this user" });

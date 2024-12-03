@@ -10,7 +10,7 @@
     <div id="app">
         <!-- Login Section -->
         <div id="login-section">
-            <h1>Movie Platform</h1>
+            <h1 id="login">Welcome to WishFlicks</h1>
             <form id="login-form">
                 <input type="text" id="username" placeholder="Username" required>
                 <input type="password" id="password" placeholder="Password" required>
@@ -20,23 +20,33 @@
         </div>
 
         <!-- Main App Section -->
-        <div id="main-section" style="display: none;">
-            <h1>Welcome to the Movie Platform</h1>
-            <button id="logout-button">Logout</button>
+        <section id="main-section" style="display: none;">
+            <header id="header">
+              <div class="header-container">
+                <!-- Left: Website name -->
+                <h1 id="main" class="website-name">WishFlicks</h1>
+          
+                <!-- Right: Search bar and logout button -->
+                <div class="right-container">
+                  <form id="search-form" class="search-form">
+                    <input
+                      type="text"
+                      id="search-bar"
+                      placeholder="Search..."
+                      aria-label="Search movies"
+                    />
+                  </form>
+                  <button id="logout-button">Logout</button>
+                </div>
+              </div>
+            </header>
 
-            <!-- Search Section -->
-            <div id="search-section">
-                <h2>Search for Movies</h2>
-                <form id="search-form">
-                    <input type="text" id="search-input" placeholder="Search for a movie" required>
-                    <button type="submit">Search</button>
-                </form>
-                <div id="search-results"></div>
-            </div>
+            <div style="padding-left: 16px"></div>
+            <section id="section"></section>
 
             <!-- User List Section -->
             <div id="user-list-section">
-                <h2>Your Movie List</h2>
+                <h2>Watchlist</h2>
                 <button id="create-list-button">Create New List</button>
                 <ul id="movie-list"></ul>
             </div>

@@ -1,60 +1,130 @@
 body {
-  font-family: Arial, sans-serif;
-  margin: 0;
-  padding: 0;
-  background-color: #f4f4f4;
+  background-color: #131720;
+  font-family: sans-serif;
 }
 
-#app {
-  max-width: 800px;
-  margin: 0 auto;
+#login{
+  color:white;
+  text-align: center;
+}
+
+#login-form{
+  text-align: center;
+}
+
+/* Movie grid container */
+#section {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
   padding: 20px;
 }
 
-form {
-  margin-bottom: 20px;
+/* Individual movie card styling */
+.card {
+  background-color: #1e1e1e; /* Dark background */
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
-input {
-  padding: 10px;
-  margin-right: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+.card:hover {
+  transform: scale(1.05); /* Slight zoom on hover */
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
 }
 
-button {
+/* Movie poster styling */
+.thumbnail {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  border-bottom: 2px solid #fff; /* Separator below image */
+}
+
+/* Movie title styling */
+.card h3 {
+  margin: 10px 0;
+  font-size: 18px;
+  color: #fff;
+}
+
+
+/* Header container styling */
+.header-container {
+  display: flex;
+  justify-content: space-between; /* Space between left and right */
+  align-items: center; /* Align items vertically */
   padding: 10px 20px;
-  background-color: #007bff;
+  background-color: #131720; /* Match the dark theme */
   color: white;
-  border: none;
+  border-bottom: 2px solid #2c2c2c;
+}
+
+/* Website name styling (far left) */
+.website-name {
+  font-size: 20px;
+  font-weight: bold;
+  color: #007bff; /* Blue text */
+  margin: 0;
+}
+
+#main{
+  font-size: xx-large;
+}
+/* Right container for search bar and logout button */
+.right-container {
+  display: flex;
+  align-items: center;
+  gap: 10px; /* Add spacing between the search bar and logout button */
+}
+
+/* Search bar styling */
+#search-bar {
+  padding: 8px;
+  border: 2px solid #007bff; /* Blue outline */
+  border-radius: 5px;
+  outline: none;
+  font-size: 14px;
+  color: #007bff; /* Blue text */
+  background-color: #131720; /* Dark background */
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+#search-bar:focus {
+  border-color: #0056b3; /* Darker blue on focus */
+  box-shadow: 0 0 8px rgba(0, 123, 255, 0.6);
+}
+
+
+#search-button {
+  padding: 8px 12px;
+  background-color: #131720; /* Dark background */
+  color: #007bff; /* Blue text */
+  border: 2px solid #007bff; /* Blue outline */
   border-radius: 5px;
   cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-button:hover {
-  background-color: #0056b3;
+#search-button:hover {
+  background-color: #007bff; /* Blue background on hover */
+  color: white; /* White text */
 }
 
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-
-li {
-  background: #fff;
-  padding: 10px;
-  margin-bottom: 10px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border: 1px solid #ccc;
+/* Logout button styling */
+#logout-button {
+  padding: 8px 12px;
+  background-color: #131720; /* Dark background */
+  color: #007bff; /* Blue text */
+  border: 2px solid #007bff; /* Blue outline */
   border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-li span {
-  margin-right: 20px;
-}
-
-#search-results {
-  margin-top: 20px;
+#logout-button:hover {
+  background-color: #007bff; /* Blue background on hover */
+  color: white; /* White text */
 }

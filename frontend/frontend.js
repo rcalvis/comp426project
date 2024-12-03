@@ -4,8 +4,8 @@ const IMG_PATH = 'https://image.tmdb.org/t/p/w1280';
 
 
 const main = document.getElementById("section");
-const form = document.getElementById("form");
-const search = document.getElementById("query");
+const form = document.getElementById("search-form");
+const search = document.getElementById("search-bar");
 
 // Select elements
 const loginSection = document.getElementById("login-section");
@@ -42,7 +42,7 @@ loginForm.addEventListener("submit", async (e) => {
 });
 
 
-returnMovies(`${backendUrl}/popular`); // Call backend for popular movies
+returnMovies(`${backendUrl}/popular`); //Call backend for popular movies 
 
 function returnMovies(url) {
   fetch(url)

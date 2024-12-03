@@ -60,6 +60,21 @@ app.get("/get-list", (req, res) => {
   res.status(200).json(req.session.user.list);
 });
 
+app.get("/popular", async (req, res) => {
+  try {
+    res.json({ success: true, movies: [] });
+    const movies = await axios.get(
+      "https://api.themoviedb.org/3/movie/popular?api_key=YOUR_API_KEY"
+    );
+    res.json(movies.data);
+  } catch (error) {
+    console.error("Error fetching popular movies:", error);
+    res.status(500).json({ message: "Failed to fetch popular movies" });
+  }
+});
+
+
+
 app.post("/add-movie", (req, res) => {
   if (!req.session.user || !req.session.user.list) {
     return res.status(404).json({ message: "No list found for this user" });

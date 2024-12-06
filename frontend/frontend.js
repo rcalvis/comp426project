@@ -18,23 +18,32 @@ const loginError = document.getElementById("login-error");
 
 // Login functionality
 loginForm.addEventListener("submit", async (e) => {
+  console.log("LOGIN FORM EVENT LISTENER");
   e.preventDefault();
+  e.stopPropagation();
   const username = document.getElementById("username").value;
   const password = document.getElementById("password").value;
+
+  console.log("Login form submitted");
 
   try {
     const response = await fetch(`${backendUrl}/user-login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, password }),
+      credentials: "include"
     });
-    const data = await response.json();
+
     if (response.ok) {
+      console.log("Logged in");
+      const data = await response.json();
       loginSection.style.display = "none";
       mainSection.style.display = "block";
-      fetchUserList();
+
+      await fetchUserList();
     } else {
-      loginError.textContent = data.message;
+      const data = await response.json();
+      alert(data.message);
     }
   } catch (error) {
     console.error(error);
@@ -42,9 +51,10 @@ loginForm.addEventListener("submit", async (e) => {
 });
 
 
-returnMovies(`${backendUrl}/popular`); //Call backend for popular movies 
+// returnMovies(`${backendUrl}/popular`); //Call backend for popular movies 
 
 function returnMovies(url) {
+  console.log("Hello return movies");
   fetch(url)
     .then((res) => {
       return res.json();
@@ -65,6 +75,7 @@ function returnMovies(url) {
 
         const div_card = document.createElement("div");
         div_card.setAttribute("class", "card");
+        div_card.setAttribute("type", "button");
 
         // Use IMG_POSTER for the movie image
         const image = document.createElement("img");
@@ -74,6 +85,14 @@ function returnMovies(url) {
         // Use #TITLE for the movie title
         const title = document.createElement("h3");
         title.textContent = movie["#TITLE"] || "No title available";
+
+        div_card.addEventListener("click", (e) => {
+          console.log("DIV_CARD EVENT LISTENER");
+          e.preventDefault();
+          e.stopPropagation();
+          addMovie(movie);
+          console.log("Button clicked. Added movie", movie);
+        })
 
         div_card.appendChild(image);
         div_card.appendChild(title);
@@ -87,7 +106,9 @@ function returnMovies(url) {
 
 // Search functionality
 form.addEventListener("submit", (e) => {
+  console.log("SEARCH FORM EVENT LISTENER");
   e.preventDefault();
+  e.stopPropagation();
   const searchItem = search.value.trim(); 
   main.innerHTML = ''; 
 
@@ -100,23 +121,38 @@ form.addEventListener("submit", (e) => {
 });
 
 
+
 // Fetch user list
 // Function to fetch the user's movie list from the backend
 async function fetchUserList() {
   try {
     // Fetch the list of movies from the backend
-    const response = await fetch("http://localhost:3000/get-list", {
+    const response = await fetch(`${backendUrl}/get-list`, {
       method: "GET",
-      credentials: "same-origin", // Ensure cookies are sent with request
+      credentials: "include", // Ensure cookies are sent with request
     });
+    console.log("Got the response.");
+
+    if (response.status !== 200) {
+      console.warn("Error: Unable to fetch data. Status Code:", response.status);
+      return;
+    }
 
     // Parse the JSON response
+
+    if (!response.ok) {
+      console.warn("Error: Unable to fetch data. Status Code:", response.status);
+      return;
+    }
+
     const data = await response.json();
 
-    console.log(data); // Log the raw response to inspect the structure
+    // Log the raw response to inspect the structure
+    console.log("Fetched data:", data);
 
     // Check if the response contains the list as an array
     if (Array.isArray(data)) {
+      console.log("Rendering movie list");
       renderMovieList(data); // Render the list if it's an array
     } else if (data && Array.isArray(data.list)) {
       // Check for nested structure
@@ -132,28 +168,100 @@ async function fetchUserList() {
 
 // Render movie list
 function renderMovieList(list) {
+  console.log("Now beginning to render list");
   movieList.innerHTML = ""; // Clear existing list
 
   // Ensure list is an array
   if (!Array.isArray(list)) {
+    console.log("Wrapping the list");
     list = [list]; // Wrap the non-array list in an array
   }
 
   // Proceed with rendering if list is now an array
   list.forEach((movie) => {
+    console.log("Listing another movie.");
     const li = document.createElement("li");
-    li.textContent = `${movie.title} - ${
-      movie.watched ? "Watched" : "Not Watched"
-    }`;
+    li.setAttribute("data-movie-id", movie.id);
+    li.style.justifyContent = "space-between";
+
+    const status = document.createElement("span");
+    status.classList.add("status");
+    status.textContent = movie.watched ? "Watched" : "Not Watched";
+
+    const titleText = document.createElement("span");
+    titleText.textContent = `${movie.title} - `;
+    li.appendChild(titleText);
+    li.appendChild(status);
+
+    const toggleButton = document.createElement("button");
+    toggleButton.textContent = movie.watched ? "Mark as not watched" : "Mark as watched";
+    toggleButton.addEventListener("click", async (e) => {
+      console.log("TOGGLE BUTTON EVENT LISTENER");
+      try {
+        e.preventDefault();
+        e.stopPropagation();
+        const newWatchedStatus = !movie.watched;
+        movie.watched = newWatchedStatus;
+
+        console.log("Sending request to backend");
+
+        console.log({ id: movie.id, watched: newWatchedStatus });
+
+
+        const response = await fetch(`${backendUrl}/toggle-watched`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json"},
+          body: JSON.stringify({id: movie.id, watched: newWatchedStatus}),
+          credentials: "include", // Ensure cookies are sent with request
+        });
+        if (response.ok) {
+          const updatedMovie = await response.json();
+          const movieElement = document.querySelector(`[data-movie-id="${movie.id}"]`);
+          const statusText = movieElement.querySelector("span.status");
+          console.log(statusText);
+          const button = movieElement.querySelector("button");
+          console.log(button);
+
+          statusText.textContent = updatedMovie.watched ? "Watched" : "Not Watched";
+          button.textContent = updatedMovie.watched ? "Mark as not watched" : "Mark as watched"
+        } else {
+          console.error("Failed to update movie status");
+        }
+      } catch (error) {
+        console.error("Error switching watch status:", error);
+      }
+    });
+
+    li.append(toggleButton);
+
+    if (movie.poster) {
+      const image = document.createElement("img");
+      image.src = movie.poster;
+      image.setAttribute("class", "thumbnail");
+      li.prepend(image);
+    }
     movieList.appendChild(li);
   });
+  console.log("Finished rendering movie list");
 }
 
 // Create new list
-createListButton.addEventListener("click", async () => {
+createListButton.addEventListener("click", async (e) => {
+  console.log("CREATE LIST EVENT BUTTON");
   try {
-    await fetch(`${backendUrl}/create-list`, { method: "POST" });
+    e.preventDefault();
+    e.stopPropagation();
+    const response = await fetch(`${backendUrl}/create-list`, { method: "POST", credentials: "include" });
+    const data = await response.json();
+
+    if (response.ok) {
+      showNotification("List created. Search for movies to add to your list.");
+    } else {
+      console.error("Error creating list");
+    }
     fetchUserList();
+    const listButton = document.getElementById("create-list-button");
+    listButton.style.display = "none";
   } catch (error) {
     console.error("Error creating list:", error);
   }
@@ -161,13 +269,31 @@ createListButton.addEventListener("click", async () => {
 
 // Add movie to list
 async function addMovie(movie) {
+  const movieToAdd = {
+    id: movie["#IMDB_ID"],
+    title: movie["#TITLE"],
+    poster: movie["IMG_#POSTER"],
+    year: movie["#YEAR"],
+    actors: movie["ACTORS"]
+  }
+  console.log("Adding movie:", movie);
   try {
-    await fetch(`${backendUrl}/add-movie`, {
+    const response = await fetch(`${backendUrl}/add-movie`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ movie }),
+      body: JSON.stringify({ movie: movieToAdd }),
+      credentials: "include"
     });
-    fetchUserList();
+    const data = response.json();
+    if (response.ok) {
+      console.log("Fetching user list now");
+      hideNotification();
+      //fetchUserList();
+    } else if (response.status == 409) {
+      showNotification("This movie is already in your list.");
+    } else {
+      console.error("Error adding movie.");
+    }
   } catch (error) {
     console.error("Error adding movie:", error);
   }
@@ -180,6 +306,7 @@ async function removeMovie(movieId) {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id: movieId }),
+      credentials: "include"
     });
     fetchUserList();
   } catch (error) {
@@ -188,7 +315,35 @@ async function removeMovie(movieId) {
 }
 
 // Logout functionality
-logoutButton.addEventListener("click", () => {
-  loginSection.style.display = "block";
-  mainSection.style.display = "none";
+logoutButton.addEventListener("click", async (e) => {
+  console.log("LOGOUT BUTTON EVENT LISTENER");
+  e.preventDefault();
+  e.stopPropagation();
+  try {
+    console.log("Logout button clicked");
+    await fetch(`${backendUrl}/logout`, { method: "POST", credentials: "include"});
+    const usernameBox = document.querySelector("#username");
+    const passwordBox = document.querySelector("#password");
+    if (usernameBox && passwordBox) {
+      usernameBox.value = "";
+      passwordBox.value = "";
+    }
+    loginSection.style.display = "block";
+    mainSection.style.display = "none";
+  } catch (error) {
+    console.error("Error logging out");
+  }
 });
+
+function showNotification(message) {
+  const notification = document.getElementById("notification");
+  notification.textContent = message;
+  notification.classList.remove("hidden");
+}
+
+function hideNotification() {
+  const notification = document.getElementById("notification");
+  notification.textContent = "";
+  notification.classList.add("hidden");
+} 
+

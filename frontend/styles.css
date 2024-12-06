@@ -180,3 +180,19 @@ body {
   text-align: center;
   margin-top: 20px;
 }
+
+.error {
+  color: red;
+}
+
+#notification {
+  padding: 10px;
+  color: white;
+  text-align: center;
+  font-size: 1rem;
+  border-radius: 5px;
+}
+
+.hidden {
+  display: none;
+}

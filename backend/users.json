@@ -2,6 +2,7 @@
   {
     "username": "user",
     "password": "password",
+    "theme": "light",
     "list": [
       {
         "id": "tt3713166",
@@ -68,6 +69,7 @@
   {
     "username": "user2",
     "password": "yas",
+    "theme": "dark",
     "list": [
       {
         "id": "tt0206511",
@@ -99,6 +101,7 @@
   {
     "username": "user3",
     "password": "user3",
+    "theme": "dark",
     "list": [
       {
         "id": "tt0206512",
@@ -115,6 +118,7 @@
   {
     "username": "testuser",
     "password": "testpassword",
+    "theme": "light",
     "list": [
       {
         "id": "tt1234567",
@@ -131,16 +135,19 @@
   {
     "username": "user6",
     "password": "user6",
+    "theme": "light",
     "list": []
   },
   {
     "username": "user7",
     "password": "user7",
+    "theme": "dark",
     "list": []
   },
   {
     "username": "user8",
     "password": "user8",
+    "theme": "dark",
     "list": [
       {
         "id": "tt0206512",
@@ -152,16 +159,19 @@
   {
     "username": "user1",
     "password": "password",
+    "theme": "light",
     "list": []
   },
   {
     "username": "user10",
     "password": "user10",
+    "theme": "dark",
     "list": []
   },
   {
     "username": "user12",
     "password": "user12",
+    "theme": "light",
     "list": [
       {
         "id": "tt0206512",
@@ -173,6 +183,7 @@
   {
     "username": "user0",
     "password": "user0",
+    "theme": "dark",
     "list": [
       {
         "id": "tt1068680",
@@ -194,31 +205,37 @@
   {
     "username": "user-1",
     "password": "user-1",
+    "theme": "dark",
     "list": []
   },
   {
     "username": "user-2",
     "password": "user-2",
+    "theme": "light",
     "list": []
   },
   {
     "username": "user-3",
     "password": "password-3",
+    "theme": "light",
     "list": []
   },
   {
     "username": "userr",
     "password": "userr",
+    "theme": "dark",
     "list": []
   },
   {
     "username": "userrr",
     "password": "userrr",
+    "theme": "light",
     "list": []
   },
   {
     "username": "user4",
     "password": "user4",
+    "theme": "dark",
     "list": []
   }
 ]

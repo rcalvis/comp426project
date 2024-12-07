@@ -3,26 +3,28 @@ const session = require("express-session");
 const cors = require("cors");
 const axios = require("axios");
 const fs = require("fs");
+const path = require("path");
 const usersFile = "./backend/users.json";
 
 const app = express();
 
 app.use(express.json());
-
 app.use(express.urlencoded({ extended: true }));
 
-app.use(cors({
-  origin: "http://127.0.0.1:5501",
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-}));
+app.use(
+  cors({
+    origin: "http://127.0.0.1:5501",
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE"],
+  })
+);
 
 app.use(
   session({
     secret: "yourSecretKey",
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: false, sameSite: "None", httpOnly: true,},
+    cookie: { secure: false, sameSite: "None", httpOnly: true },
   })
 );
 
@@ -33,23 +35,56 @@ app.get("/", (req, res) => {
 let users = [];
 
 if (fs.existsSync(usersFile)) {
-  const usersData = fs.readFileSync(usersFile, 'utf8');
+  const usersData = fs.readFileSync(usersFile, "utf8");
   users = JSON.parse(usersData);
-};
+}
 
 const saveUsers = () => {
   try {
-    fs.writeFileSync(usersFile, JSON.stringify(users, null, 2), 'utf8');
+    fs.writeFileSync(usersFile, JSON.stringify(users, null, 2), "utf8");
     console.log("saveUsers() success");
   } catch (err) {
     console.log("saveUsers() failed", err);
   }
 };
 
+// Helper function to read users.json
+const readUsers = () => {
+  const data = fs.readFileSync(path.join(__dirname, "users.json"), "utf-8");
+  return JSON.parse(data);
+};
+
+// Helper function to write to users.json
+const writeUsers = (users) => {
+  fs.writeFileSync(
+    path.join(__dirname, "users.json"),
+    JSON.stringify(users, null, 2),
+    "utf-8"
+  );
+};
+
+// Route to update theme preference
+app.post("/update-theme", (req, res) => {
+  const { username, theme } = req.body; // Expecting { username, theme } in the request body
+
+  const users = readUsers();
+  const user = users.find((user) => user.username === username);
+
+  if (user) {
+    user.theme = theme; // Update theme preference
+    writeUsers(users); // Save the updated users.json
+    res.status(200).json({ message: "Theme updated successfully" });
+  } else {
+    res.status(404).json({ message: "User not found" });
+  }
+});
+
 app.post("/user-login", (req, res) => {
   const { username, password } = req.body;
 
-  let user = users.find(u => u.username.toLowerCase() == username.toLowerCase());
+  let user = users.find(
+    (u) => u.username.toLowerCase() == username.toLowerCase()
+  );
 
   if (user) {
     if (user.password == password) {
@@ -57,32 +92,34 @@ app.post("/user-login", (req, res) => {
       console.log("Logged back in");
       req.session.user = { username, list: user.list };
       console.log("User list:", user.list);
-      return res.status(200).json({ message : "Successfully logged in"});
+      return res.status(200).json({ message: "Successfully logged in" });
     } else {
-      return res.status(401).json({message: "Incorrect password"});
+      return res.status(401).json({ message: "Incorrect password" });
     }
   } else {
-    const newUser = {username, password, list: []};
+    const newUser = { username, password, list: [] };
     users.push(newUser);
     saveUsers();
-    req.session.user = {username, list: []};
+    req.session.user = { username, list: [] };
     console.log("Users saved to file:", users);
-    return res.status(201).json({message: "Account created"});
+    return res.status(201).json({ message: "Account created" });
   }
 });
 
 app.get("/get-list", (req, res) => {
   console.log("Session on /get-list:", req.session);
   if (!req.session.user) {
-    return res.status(401).json({ message: "Session expired or user not logged in"});
+    return res
+      .status(401)
+      .json({ message: "Session expired or user not logged in" });
   }
   console.log("User list:", req.session.user.list);
 
   if (!req.session.user.list) {
-    return res.status(400).json({message: "No movie list available."});
+    return res.status(400).json({ message: "No movie list available." });
   }
 
-  res.json({ list : req.session.user.list });
+  res.json({ list: req.session.user.list });
   console.log("Session after /get-list:", req.session);
 });
 
@@ -111,7 +148,10 @@ app.post("/create-list", (req, res) => {
     return res.status(401).json({ message: "User must be logged in" });
   }
 
-  if (Array.isArray(req.session.user.list) && req.session.user.list.length > 0) {
+  if (
+    Array.isArray(req.session.user.list) &&
+    req.session.user.list.length > 0
+  ) {
     return res.status(400).json({ message: "You already have a list" });
   }
 
@@ -119,9 +159,7 @@ app.post("/create-list", (req, res) => {
   res.status(200).json({ message: "User list created" });
 });
 
-app.get("/popular", (req, res) => {
-
-})
+app.get("/popular", (req, res) => {});
 
 app.post("/add-movie", (req, res) => {
   console.log("Session before adding movie:", req.session);
@@ -137,20 +175,28 @@ app.post("/add-movie", (req, res) => {
     return res.status(400).json({ message: "Movie not found" });
   }
 
-  let movieOnList = req.session.user.list.some(item => String(item.id) == String(movie.id));
+  let movieOnList = req.session.user.list.some(
+    (item) => String(item.id) == String(movie.id)
+  );
 
-  console.log(`Checking if movie with ID ${movie.id} is already in list: ${movieOnList}`);
+  console.log(
+    `Checking if movie with ID ${movie.id} is already in list: ${movieOnList}`
+  );
 
   if (movieOnList) {
-    return res.status(409).json({message: "Movie already in list"});
+    return res.status(409).json({ message: "Movie already in list" });
   }
 
   req.session.user.list.push(movie);
 
-  const userIndex = users.findIndex(u => u.username.toLowerCase() == req.session.user.username.toLowerCase());
+  const userIndex = users.findIndex(
+    (u) => u.username.toLowerCase() == req.session.user.username.toLowerCase()
+  );
   users[userIndex].list.push(movie);
   saveUsers();
-  res.status(200).json({ message: "Movie added to user list", list: req.session.user.list });
+  res
+    .status(200)
+    .json({ message: "Movie added to user list", list: req.session.user.list });
 });
 
 app.post("/toggle-watched", (req, res) => {
@@ -158,12 +204,12 @@ app.post("/toggle-watched", (req, res) => {
   console.log("Movie id received:");
   console.log(req.body);
   if (!req.session.user || !req.session.user.list) {
-    return res.status(404).json({message: "No list found for user."});
+    return res.status(404).json({ message: "No list found for user." });
   }
 
-  const {id, watched} = req.body;
+  const { id, watched } = req.body;
 
-  const movie = req.session.user.list.find(movie => movie.id == id);
+  const movie = req.session.user.list.find((movie) => movie.id == id);
 
   if (!movie || !movie.id) {
     return res.status(400).json(movie);
@@ -171,19 +217,21 @@ app.post("/toggle-watched", (req, res) => {
 
   movie.watched = watched;
 
-  res.status(200).json({id: movie.id, title: movie.title, watched: movie.watched});
+  res
+    .status(200)
+    .json({ id: movie.id, title: movie.title, watched: movie.watched });
 });
 
 app.post("/logout", (req, res) => {
   console.log("Logging out");
   req.session.destroy((err) => {
     if (err) {
-      return res.status(500).json({message: "Error logging out"});
+      return res.status(500).json({ message: "Error logging out" });
     }
     res.clearCookie("connect.sid");
-    res.status(200).json({message: "Successfully logged out"});
-  })
-})
+    res.status(200).json({ message: "Successfully logged out" });
+  });
+});
 
 app.delete("/delete-movie", (req, res) => {
   if (!req.session.user || !req.session.user.list) {
@@ -208,4 +256,17 @@ app.delete("/delete-movie", (req, res) => {
 const PORT = 3000;
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
+});
+
+// Route to get user's theme
+app.get("/get-user-theme", (req, res) => {
+  const { username } = req.query;
+  const users = readUsers();
+  const user = users.find((user) => user.username === username);
+
+  if (user) {
+    res.status(200).json({ theme: user.theme });
+  } else {
+    res.status(404).json({ message: "User not found" });
+  }
 });

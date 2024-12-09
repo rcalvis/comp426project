@@ -1,3 +1,4 @@
+console.log('Page Reloaded at:', new Date().toLocaleString());
 const backendUrl = "http://localhost:3000";
 const IMG_PATH = "https://image.tmdb.org/t/p/w1280";
 
@@ -20,7 +21,19 @@ const theme = window.matchMedia("(prefers-color-scheme: dark)").matches
 // Apply dark or light theme
 document.body.classList.add(theme);
 
-// Login functionality
+document.querySelectorAll('form').forEach(form => {
+  form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      console.log('Form submission detected at:', new Date().toLocaleString());
+  });
+});
+
+window.addEventListener('beforeunload', (e) => {
+  e.preventDefault();
+  console.log('beforeunload event triggered at:', new Date().toLocaleString());
+});
+
+// login functionality
 loginForm.addEventListener("submit", async (e) => {
   console.log("LOGIN FORM EVENT LISTENER");
   e.preventDefault();
@@ -38,6 +51,8 @@ loginForm.addEventListener("submit", async (e) => {
       credentials: "include",
     });
 
+    console.log(response.status);
+
     if (response.ok) {
       console.log("Logged in");
       const data = await response.json();
@@ -45,20 +60,22 @@ loginForm.addEventListener("submit", async (e) => {
       loginSection.style.display = "none";
       mainSection.style.display = "block";
 
-      await fetchUserList();
+      fetchUserList();
+      console.log("Login Done - success");
+      return;
     } else {
       const data = await response.json();
       alert(data.message);
+      console.log("Login Done - fail");
     }
   } catch (error) {
     console.error(error);
+    console.log("Login Done - caught error");
   }
 });
 
-// returnMovies(`${backendUrl}/popular`); //Call backend for popular movies
-
 function returnMovies(url) {
-  console.log("Hello return movies");
+  console.log("returnMovies()");
   fetch(url)
     .then((res) => {
       return res.json();
@@ -78,6 +95,7 @@ function returnMovies(url) {
       moviesToShow.forEach((movie) => {
         console.log("Rendering movie:", movie); // Debug movie object
 
+
         const div_card = document.createElement("div");
         div_card.setAttribute("class", "card");
         div_card.setAttribute("type", "button");
@@ -93,21 +111,26 @@ function returnMovies(url) {
         const title = document.createElement("h3");
         title.textContent = movie["#TITLE"] || "No title available";
 
-        div_card.addEventListener("click", (e) => {
+        div_card.addEventListener("click", async (e) => {
           console.log("DIV_CARD EVENT LISTENER");
           e.preventDefault();
           e.stopPropagation();
-          addMovie(movie);
+          console.log("Adding movie...");
+          await addMovie(movie);
           console.log("Button clicked. Added movie", movie);
+          fetchUserList();
         });
 
         div_card.appendChild(image);
         div_card.appendChild(title);
+
         main.appendChild(div_card);
+        console.log("returnMovies() Done - success");
       });
     })
     .catch((error) => {
       console.error("Error fetching movies:", error);
+      console.log("returnMovies() Done - fail");
     });
 }
 
@@ -125,11 +148,13 @@ form.addEventListener("submit", (e) => {
   } else {
     main.innerHTML = '<p class="error">Please enter a search term.</p>';
   }
+  console.log("Search Done");
 });
 
 // Fetch user list
 // Function to fetch the user's movie list from the backend
 async function fetchUserList() {
+  console.log("fetchUserList()");
   try {
     // Fetch the list of movies from the backend
     const response = await fetch(`${backendUrl}/get-list`, {
@@ -137,29 +162,15 @@ async function fetchUserList() {
       credentials: "include", // Ensure cookies are sent with request
     });
     console.log("Got the response.");
+    console.log("Response status for /get-list:",response.status);
 
-    if (response.status !== 200) {
-      console.warn(
-        "Error: Unable to fetch data. Status Code:",
-        response.status
-      );
+    if (!response.ok) {
+      console.warn("Error: Unable to fetch data. Status Code:", response.status);
       return;
     }
 
     // Parse the JSON response
-
-    if (!response.ok) {
-      console.warn(
-        "Error: Unable to fetch data. Status Code:",
-        response.status
-      );
-      return;
-    }
-
     const data = await response.json();
-
-    // Log the raw response to inspect the structure
-    console.log("Fetched data:", data);
 
     // Check if the response contains the list as an array
     if (Array.isArray(data)) {
@@ -172,15 +183,22 @@ async function fetchUserList() {
       console.error("No valid list found in the response");
       movieList.innerHTML = "<li>No movies found.</li>"; // Show fallback message
     }
+    console.log("fetchUserList() done - success");
   } catch (error) {
     console.error("Error fetching user list:", error);
+    console.log("fetchUserList() done - fail");
   }
 }
 
 // Render movie list
 function renderMovieList(list) {
-  console.log("Now beginning to render list");
+  console.log("renderMovieList()");
   movieList.innerHTML = ""; // Clear existing list
+
+  if (!list) {
+    console.warn("Invalid list given.");
+    return;
+  }
 
   // Ensure list is an array
   if (!Array.isArray(list)) {
@@ -190,67 +208,15 @@ function renderMovieList(list) {
 
   // Proceed with rendering if list is now an array
   list.forEach((movie) => {
+    console.log(movie);
     console.log("Listing another movie.");
     const li = document.createElement("li");
     li.setAttribute("data-movie-id", movie.id);
     li.style.justifyContent = "space-between";
 
-    const status = document.createElement("span");
-    status.classList.add("status");
-    status.textContent = movie.watched ? "Watched" : "Not Watched";
-
     const titleText = document.createElement("span");
-    titleText.textContent = `${movie.title} - `;
+    titleText.textContent = `${movie.title}`;
     li.appendChild(titleText);
-    li.appendChild(status);
-
-    const toggleButton = document.createElement("button");
-    toggleButton.textContent = movie.watched
-      ? "Mark as not watched"
-      : "Mark as watched";
-    toggleButton.addEventListener("click", async (e) => {
-      console.log("TOGGLE BUTTON EVENT LISTENER");
-      try {
-        e.preventDefault();
-        e.stopPropagation();
-        const newWatchedStatus = !movie.watched;
-        movie.watched = newWatchedStatus;
-
-        console.log("Sending request to backend");
-
-        console.log({ id: movie.id, watched: newWatchedStatus });
-
-        const response = await fetch(`${backendUrl}/toggle-watched`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id: movie.id, watched: newWatchedStatus }),
-          credentials: "include", // Ensure cookies are sent with request
-        });
-        if (response.ok) {
-          const updatedMovie = await response.json();
-          const movieElement = document.querySelector(
-            `[data-movie-id="${movie.id}"]`
-          );
-          const statusText = movieElement.querySelector("span.status");
-          console.log(statusText);
-          const button = movieElement.querySelector("button");
-          console.log(button);
-
-          statusText.textContent = updatedMovie.watched
-            ? "Watched"
-            : "Not Watched";
-          button.textContent = updatedMovie.watched
-            ? "Mark as not watched"
-            : "Mark as watched";
-        } else {
-          console.error("Failed to update movie status");
-        }
-      } catch (error) {
-        console.error("Error switching watch status:", error);
-      }
-    });
-
-    li.append(toggleButton);
 
     if (movie.poster) {
       const image = document.createElement("img");
@@ -260,8 +226,14 @@ function renderMovieList(list) {
     }
     movieList.appendChild(li);
   });
-  console.log("Finished rendering movie list");
+  console.log("renderMovieList() done - success");
 }
+
+window.onerror = function(message, source, lineno, colno, error) {
+  console.log(`Error: ${message} at ${source}:${lineno}:${colno}`);
+  // prevent the default reload behavior
+  return true;
+};
 
 // Create new list
 createListButton.addEventListener("click", async (e) => {
@@ -273,82 +245,109 @@ createListButton.addEventListener("click", async (e) => {
       method: "POST",
       credentials: "include",
     });
-    const data = await response.json();
+
+    console.log("Response status for /create-list:", response.status);
 
     if (response.ok) {
-      showNotification("List created. Search for movies to add to your list.");
+      const data = await response.json();
     } else {
       console.error("Error creating list");
     }
     fetchUserList();
     const listButton = document.getElementById("create-list-button");
     listButton.style.display = "none";
+    console.log("create List button success");
   } catch (error) {
     console.error("Error creating list:", error);
+    console.log("Create list button fail");
   }
 });
 
+const themeToggle = document.getElementById("theme-toggle");
+if (themeToggle) {
+  themeToggle.addEventListener("change", toggleTheme);
+}
+
 // Function to toggle theme
-function toggleTheme() {
-  const theme = document.getElementById("theme-toggle").checked
-    ? "dark"
-    : "light";
+async function toggleTheme(event) {
+  console.log("toggleTheme()");
+  event.preventDefault();
+
+  console.log("Getting if theme light or dark");
+  const theme = document.getElementById("theme-toggle").checked ? "dark" : "light";
+
+
   document.body.className = theme; // Apply the theme class to body
+  console.log("Set className to theme");
 
   // Retrieve the logged-in username from sessionStorage
   const username = sessionStorage.getItem("username");
+  console.log("Retrieved username");
 
   if (!username) {
     console.error("No logged-in username found.");
     return;
   }
 
-  // Send the updated theme to the backend
-  fetch("/update-theme", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      username: username,
-      theme: theme,
-    }),
-  })
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error(`Error: ${response.statusText}`);
-      }
-      return response.json();
-    })
-    .then((data) => {
-      console.log(data.message); // Successfully updated theme
-    })
-    .catch((error) => {
-      console.error("Error updating theme:", error);
+  // TODO: BUG
+  try {
+    const response = await fetch(`${backendUrl}/update-theme`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({username, theme}),
     });
+    if (!response.ok) {
+      console.log("Threw error");
+      throw new Error(`${response.statusText}`);
+    }
+      //return response.json();
+    console.log("Response status for update-theme:", response.status);
+    const data = await response.json();
+    console.log(data.message);
+    console.log("toggleTheme done success");
+  } catch(error) {
+    console.error(error);
+    console.log("toggleTheme done fail");
+  }
 
   // Save the theme in local storage to persist across sessions
+  // okay:
   localStorage.setItem("theme", theme);
 }
 
 // On page load, check localStorage or fetch theme from the backend
-window.onload = function () {
+window.onload = async function () {
   // Check if theme is saved in localStorage
   let savedTheme = localStorage.getItem("theme");
+  console.log("Got window onload savedTheme");
 
   if (!savedTheme) {
     // If no theme is saved, fetch it from the backend (after user login)
-    const username = getLoggedInUsername(); // Replace with your actual login logic
+    const username = sessionStorage.getItem('username'); // Replace with your actual login logic
+    console.log("Get username");
 
-    fetch(`/get-user-theme?username=${username}`)
-      .then((response) => response.json())
-      .then((data) => {
+    if (!username) {
+      console.error("No username found");
+      return;
+    }
+
+    try {
+      const response = await fetch(`${backendUrl}/get-user-theme?username=${username}`);
+      if (response.ok) {
+        const data = await response.json();
         savedTheme = data.theme || "light"; // Default to light theme if not set
         localStorage.setItem("theme", savedTheme); // Save to localStorage
         document.body.className = savedTheme;
         document.getElementById("theme-toggle").checked = savedTheme === "dark";
-      });
+        console.log("changed theme");
+      }
+    } catch (error) {
+      console.error(error);
+    }
   } else {
+    console.log("Changing theme bc no usernamen");
     document.body.className = savedTheme;
     document.getElementById("theme-toggle").checked = savedTheme === "dark";
   }
@@ -356,33 +355,46 @@ window.onload = function () {
 
 // Add movie to list
 async function addMovie(movie) {
-  const movieToAdd = {
-    id: movie["#IMDB_ID"],
-    title: movie["#TITLE"],
-    poster: movie["IMG_#POSTER"],
-    year: movie["#YEAR"],
-    actors: movie["ACTORS"],
-  };
-  console.log("Adding movie:", movie);
+  console.log("addMovie()");
   try {
+    const movieToAdd = {
+      id: movie["#IMDB_ID"],
+      title: movie["#TITLE"],
+      poster: movie["#IMG_POSTER"],
+      year: movie["#YEAR"],
+      actors: movie["ACTORS"],
+    };
+
+    console.log("Adding movie:", movie);
     const response = await fetch(`${backendUrl}/add-movie`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ movie: movieToAdd }),
-      credentials: "include",
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-cache'
+      },
+      body: JSON.stringify({movie: movieToAdd}),
+      credentials: 'include'
     });
-    const data = response.json();
-    if (response.ok) {
-      console.log("Fetching user list now");
-      hideNotification();
-      //fetchUserList();
-    } else if (response.status == 409) {
-      showNotification("This movie is already in your list.");
-    } else {
-      console.error("Error adding movie.");
+    if (!response.ok) {
+      throw new Error('Error status:', response.status);
     }
-  } catch (error) {
-    console.error("Error adding movie:", error);
+    console.log("Get movie response: ");
+    console.log(response.status);
+    if (response.status >= 300 && response.status < 400) {
+        console.warn("Redirection detected:", response);
+        return;
+    }
+    const data = await response.json();
+    console.log("Add movie response", data);
+    if (data.message == "Movie added to user list") {
+      console.log("Movie added successfully");
+    } else {
+      console.error("Error: ", data.message);
+    } 
+    console.log("addMovie() done - success");
+  } catch(error) {
+      console.error('Error adding movie:', error);
+      console.log("addMovie() done - fail)");
   }
 }
 
@@ -420,19 +432,8 @@ logoutButton.addEventListener("click", async (e) => {
     }
     loginSection.style.display = "block";
     mainSection.style.display = "none";
+    sessionStorage.clear();
   } catch (error) {
     console.error("Error logging out");
   }
 });
-
-function showNotification(message) {
-  const notification = document.getElementById("notification");
-  notification.textContent = message;
-  notification.classList.remove("hidden");
-}
-
-function hideNotification() {
-  const notification = document.getElementById("notification");
-  notification.textContent = "";
-  notification.classList.add("hidden");
-}

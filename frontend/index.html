@@ -18,7 +18,6 @@
             </form>
             <p id="login-error"></p>
         </div>
-
         <!-- Main App Section -->
         <section id="main-section" style="display: none;">
             <header id="header">
@@ -35,11 +34,12 @@
                       placeholder="Search..."
                       aria-label="Search movies"
                     />
-                    <button type="submit" style="display: none;"></button>
                   </form>
-                  <label for="theme-toggle">Switch to Dark Mode</label>
-                    <input type="checkbox" id="theme-toggle" onchange="toggleTheme()">
-                  <button id="logout-button">Logout</button>
+                  <form onsumbit="return false"></form>
+                    <label for="theme-toggle">Switch to Dark Mode</label>
+                    <input type="checkbox" id="theme-toggle">
+                    <button id="logout-button" type="button">Logout</button>
+                  </form>
                 </div>
               </div>
             </header>

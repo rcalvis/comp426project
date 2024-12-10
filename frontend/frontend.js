@@ -1,4 +1,4 @@
-console.log('Page Reloaded at:', new Date().toLocaleString());
+console.log("Page Reloaded at:", new Date().toLocaleString());
 const backendUrl = "http://localhost:3000";
 const IMG_PATH = "https://image.tmdb.org/t/p/w1280";
 
@@ -21,16 +21,16 @@ const theme = window.matchMedia("(prefers-color-scheme: dark)").matches
 // Apply dark or light theme
 document.body.classList.add(theme);
 
-document.querySelectorAll('form').forEach(form => {
-  form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      console.log('Form submission detected at:', new Date().toLocaleString());
+document.querySelectorAll("form").forEach((form) => {
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    console.log("Form submission detected at:", new Date().toLocaleString());
   });
 });
 
-window.addEventListener('beforeunload', (e) => {
+window.addEventListener("beforeunload", (e) => {
   e.preventDefault();
-  console.log('beforeunload event triggered at:', new Date().toLocaleString());
+  console.log("beforeunload event triggered at:", new Date().toLocaleString());
 });
 
 // login functionality
@@ -94,7 +94,6 @@ function returnMovies(url) {
       const moviesToShow = movies.slice(0, 4);
       moviesToShow.forEach((movie) => {
         console.log("Rendering movie:", movie); // Debug movie object
-
 
         const div_card = document.createElement("div");
         div_card.setAttribute("class", "card");
@@ -162,10 +161,13 @@ async function fetchUserList() {
       credentials: "include", // Ensure cookies are sent with request
     });
     console.log("Got the response.");
-    console.log("Response status for /get-list:",response.status);
+    console.log("Response status for /get-list:", response.status);
 
     if (!response.ok) {
-      console.warn("Error: Unable to fetch data. Status Code:", response.status);
+      console.warn(
+        "Error: Unable to fetch data. Status Code:",
+        response.status
+      );
       return;
     }
 
@@ -229,7 +231,7 @@ function renderMovieList(list) {
   console.log("renderMovieList() done - success");
 }
 
-window.onerror = function(message, source, lineno, colno, error) {
+window.onerror = function (message, source, lineno, colno, error) {
   console.log(`Error: ${message} at ${source}:${lineno}:${colno}`);
   // prevent the default reload behavior
   return true;
@@ -264,9 +266,27 @@ createListButton.addEventListener("click", async (e) => {
 });
 
 const themeToggle = document.getElementById("theme-toggle");
-if (themeToggle) {
-  themeToggle.addEventListener("change", toggleTheme);
-}
+themeToggle.addEventListener("change", async (e) => {
+  const isChecked = e.target.checked;
+  console.log("Checkbox state changed:", isChecked);
+
+  try {
+    const response = await fetch(`${backendUrl}/update-preference`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ preference: isChecked }),
+      credentials: "include",
+    });
+
+    if (response.ok) {
+      console.log("Preference updated successfully");
+    } else {
+      console.error("Failed to update preference");
+    }
+  } catch (error) {
+    console.error("Error updating preference:", error);
+  }
+});
 
 // Function to toggle theme
 async function toggleTheme(event) {
@@ -274,8 +294,9 @@ async function toggleTheme(event) {
   event.preventDefault();
 
   console.log("Getting if theme light or dark");
-  const theme = document.getElementById("theme-toggle").checked ? "dark" : "light";
-
+  const theme = document.getElementById("theme-toggle").checked
+    ? "dark"
+    : "light";
 
   document.body.className = theme; // Apply the theme class to body
   console.log("Set className to theme");
@@ -296,18 +317,18 @@ async function toggleTheme(event) {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({username, theme}),
+      body: JSON.stringify({ username, theme }),
     });
     if (!response.ok) {
       console.log("Threw error");
       throw new Error(`${response.statusText}`);
     }
-      //return response.json();
+    //return response.json();
     console.log("Response status for update-theme:", response.status);
     const data = await response.json();
     console.log(data.message);
     console.log("toggleTheme done success");
-  } catch(error) {
+  } catch (error) {
     console.error(error);
     console.log("toggleTheme done fail");
   }
@@ -325,7 +346,7 @@ window.onload = async function () {
 
   if (!savedTheme) {
     // If no theme is saved, fetch it from the backend (after user login)
-    const username = sessionStorage.getItem('username'); // Replace with your actual login logic
+    const username = sessionStorage.getItem("username"); // Replace with your actual login logic
     console.log("Get username");
 
     if (!username) {
@@ -334,7 +355,9 @@ window.onload = async function () {
     }
 
     try {
-      const response = await fetch(`${backendUrl}/get-user-theme?username=${username}`);
+      const response = await fetch(
+        `${backendUrl}/get-user-theme?username=${username}`
+      );
       if (response.ok) {
         const data = await response.json();
         savedTheme = data.theme || "light"; // Default to light theme if not set
@@ -367,22 +390,22 @@ async function addMovie(movie) {
 
     console.log("Adding movie:", movie);
     const response = await fetch(`${backendUrl}/add-movie`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'Cache-Control': 'no-cache'
+        "Content-Type": "application/json",
+        "Cache-Control": "no-cache",
       },
-      body: JSON.stringify({movie: movieToAdd}),
-      credentials: 'include'
+      body: JSON.stringify({ movie: movieToAdd }),
+      credentials: "include",
     });
     if (!response.ok) {
-      throw new Error('Error status:', response.status);
+      throw new Error("Error status:", response.status);
     }
     console.log("Get movie response: ");
     console.log(response.status);
     if (response.status >= 300 && response.status < 400) {
-        console.warn("Redirection detected:", response);
-        return;
+      console.warn("Redirection detected:", response);
+      return;
     }
     const data = await response.json();
     console.log("Add movie response", data);
@@ -390,11 +413,11 @@ async function addMovie(movie) {
       console.log("Movie added successfully");
     } else {
       console.error("Error: ", data.message);
-    } 
+    }
     console.log("addMovie() done - success");
-  } catch(error) {
-      console.error('Error adding movie:', error);
-      console.log("addMovie() done - fail)");
+  } catch (error) {
+    console.error("Error adding movie:", error);
+    console.log("addMovie() done - fail)");
   }
 }
 

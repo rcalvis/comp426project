@@ -2,14 +2,14 @@ const express = require("express");
 const session = require("express-session");
 const cors = require("cors");
 const axios = require("axios");
-const db = require('./db');
+const db = require("./db");
 
 const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.set('etag', false);
+app.set("etag", false);
 
 app.use(
   cors({
@@ -33,59 +33,114 @@ app.get("/", (req, res) => {
 });
 
 // Route to update theme preference
+// app.post("/update-theme", (req, res) => {
+//   try {
+//     const { username, theme } = req.body; // Expecting { username, theme } in the request body
+
+//     console.log("Username:", username);
+//     console.log("Theme:", theme);
+
+//     if (!username || !theme) {
+//       return res.status(400).json({message: "Username and/or theme missing."});
+//     }
+
+//     db.run(`UPDATE users SET theme = ? WHERE username = ?`, [theme, username], function(err) {
+//       if (err) {
+//         return res.status(500).json("Error updating theme");
+//       }
+
+//       res.status(200).json({ message: "Successfully changed theme"});
+//     })
+//   } catch(error) {
+//     console.error(error);
+//     return res.status(500).json("Internal server error");
+//   }
+// });
 app.post("/update-theme", (req, res) => {
   try {
     const { username, theme } = req.body; // Expecting { username, theme } in the request body
-
     console.log("Username:", username);
     console.log("Theme:", theme);
 
     if (!username || !theme) {
-      return res.status(400).json({message: "Username and/or theme missing."});
+      return res
+        .status(400)
+        .json({ message: "Username and/or theme missing." });
     }
 
-    db.run(`UPDATE users SET theme = ? WHERE username = ?`, [theme, username], function(err) {
-      if (err) {
-        return res.status(500).json("Error updating theme");
-      }
+    db.run(
+      `UPDATE users SET theme = ? WHERE username = ?`,
+      [theme, username],
+      function (err) {
+        if (err) {
+          return res.status(500).json("Error updating theme");
+        }
 
-      res.status(200).json({ message: "Successfully changed theme"});
-    })
-  } catch(error) {
+        res.status(200).json({ message: "Successfully changed theme" });
+      }
+    );
+  } catch (error) {
     console.error(error);
     return res.status(500).json("Internal server error");
   }
 });
 
+app.get("/get-user-theme", (req, res) => {
+  const { username } = req.query;
+  if (!username) {
+    return res.status(400).json({ message: "Username required" });
+  }
+
+  db.get(
+    `SELECT theme FROM users WHERE username = ?`,
+    [username],
+    function (err, row) {
+      if (err) {
+        return res.status(500).json("Internal server error");
+      }
+
+      if (row) {
+        return res.status(200).json({ theme: row.theme });
+      } else {
+        return res.status(404).json({ message: "User not found" });
+      }
+    }
+  );
+});
+
 app.post("/user-login", (req, res) => {
   const { username, password } = req.body;
 
-  db.get('SELECT * FROM users WHERE username = ?', [username], (err, user) => {
+  db.get("SELECT * FROM users WHERE username = ?", [username], (err, user) => {
     if (err) {
       return res.status(500).json({ message: "Error logging in." });
     }
 
-  if (user) {
-    if (user.password == password) {
-      console.log("Logged back in");
-      req.session.user = { username, list: JSON.parse(user.list || '[]') };
-      console.log("User list:", user.list);
-      return res.status(200).json({ message: "Successfully logged in" });
-    } else {
-      return res.status(401).json({ message: "Incorrect password" });
-    }
-  } else {
-    const newUser = { username, password, theme: 'light', list: '[]' };
-    db.run(`INSERT INTO users (username, password, theme, list) VALUES (?, ?, ?, ?)`, [username, password, 'light', '[]'], function(err) {
-      if (err) {
-        return res.status(500).json("Internal servor error");
+    if (user) {
+      if (user.password == password) {
+        console.log("Logged back in");
+        req.session.user = { username, list: JSON.parse(user.list || "[]") };
+        console.log("User list:", user.list);
+        return res.status(200).json({ message: "Successfully logged in" });
+      } else {
+        return res.status(401).json({ message: "Incorrect password" });
       }
+    } else {
+      const newUser = { username, password, theme: "light", list: "[]" };
+      db.run(
+        `INSERT INTO users (username, password, theme, list) VALUES (?, ?, ?, ?)`,
+        [username, password, "light", "[]"],
+        function (err) {
+          if (err) {
+            return res.status(500).json("Internal servor error");
+          }
 
-      req.session.user = { username, list: [] };
-      return res.status(201).json({message: "User successfully created"});
-    });
-  }
-  })
+          req.session.user = { username, list: [] };
+          return res.status(201).json({ message: "User successfully created" });
+        }
+      );
+    }
+  });
 });
 
 app.get("/get-list", (req, res) => {
@@ -94,7 +149,9 @@ app.get("/get-list", (req, res) => {
   res.setHeader("Expires", "0");
 
   if (!req.session.user) {
-    return res.status(401).json({ message: "Session expired or user not logged in" });
+    return res
+      .status(401)
+      .json({ message: "Session expired or user not logged in" });
   }
   console.log("User list:", req.session.user.list);
 
@@ -102,18 +159,22 @@ app.get("/get-list", (req, res) => {
     return res.status(400).json({ message: "No movie list available." });
   }
 
-  db.get(`SELECT list FROM users WHERE username = ?`, [req.session.user.username], function (err, row) {
-    if (err) {
-      return res.status(500).json("Error getting user list");
-    }
+  db.get(
+    `SELECT list FROM users WHERE username = ?`,
+    [req.session.user.username],
+    function (err, row) {
+      if (err) {
+        return res.status(500).json("Error getting user list");
+      }
 
-    if (row) {
-      req.session.user.list = JSON.parse(row.list);
-      res.json({list: req.session.user.list});
-    } else {
-      return res.status(404).json("User not found");
+      if (row) {
+        req.session.user.list = JSON.parse(row.list);
+        res.json({ list: req.session.user.list });
+      } else {
+        return res.status(404).json("User not found");
+      }
     }
-  })
+  );
 });
 
 app.get("/search", async (req, res) => {
@@ -183,14 +244,21 @@ app.post("/add-movie", (req, res) => {
 
   const updatedList = JSON.stringify(req.session.user.list);
 
-  const {username} = req.session.user;
+  const { username } = req.session.user;
 
-  db.run(`UPDATE users SET list = ? WHERE username = ?`, [updatedList, username], function(err) {
-    if (err) {
-      res.status(500).json("Error updating movie list");
+  db.run(
+    `UPDATE users SET list = ? WHERE username = ?`,
+    [updatedList, username],
+    function (err) {
+      if (err) {
+        res.status(500).json("Error updating movie list");
+      }
+      res.status(200).json({
+        message: "Movie added to user list",
+        list: req.session.user.list,
+      });
     }
-    res.status(200).json({ message: "Movie added to user list", list: req.session.user.list });
-  })
+  );
 });
 
 app.post("/logout", (req, res) => {
@@ -227,25 +295,4 @@ app.delete("/delete-movie", (req, res) => {
 const PORT = 3000;
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
-});
-
-// Route to get user's theme
-app.get("/get-user-theme", (req, res) => {
-  const { username } = req.query;
-
-  if (!username) {
-    return res.status(400).json({message: "Username required"});
-  }
-
-  db.get(`SELECT theme FROM users WHERE username = ?`, [username], function(err, row) {
-    if (err) {
-      return res.status(500).json("Internal server error");
-    }
-
-    if (row) {
-      return res.status(200).json({theme: row.theme});
-    } else {
-      return res.status(404).json({message: "User not found"});
-    }
-  })
 });

@@ -16,16 +16,17 @@
                 <input type="password" id="password" placeholder="Password" required>
                 <button type="submit">Login</button>
             </form>
-            <p id="login-error"></p>
+            <p id="login-error" aria-live="polite"></p>
         </div>
+
         <!-- Main App Section -->
-        <section id="main-section" style="display: none;">
+        <section id="main-section" class="hidden">
             <header id="header">
               <div class="header-container">
                 <!-- Left: Website name -->
                 <h1 id="main" class="website-name">WishFlicks</h1>
           
-                <!-- Right: Search bar and logout button -->
+                <!-- Right: Search bar, theme toggle, and logout button -->
                 <div class="right-container">
                   <form id="search-form" class="search-form">
                     <input
@@ -35,11 +36,11 @@
                       aria-label="Search movies"
                     />
                   </form>
-                  <form onsumbit="return false"></form>
-                    <label for="theme-toggle">Switch to Dark Mode</label>
-                    <input type="checkbox" id="theme-toggle">
-                    <button id="logout-button" type="button">Logout</button>
-                  </form>
+                  <div id="theme-toggle">
+                    <label for="theme-checkbox">Toggle dark mode</label>
+                    <input type="checkbox" id="theme-checkbox" />
+                  </div>
+                  <button id="logout-button" type="button">Logout</button>
                 </div>
               </div>
             </header>
@@ -58,22 +59,22 @@
                 <h2 class="watchlist-title">Watchlist</h2>
                 
                 <!-- Add button -->
-                <button id="create-list-button" type="button" class="add-button" aria-label="Create New List">
-                  +
-                </button>
+                <button id="create-list-button" type="button" class="add-button" aria-label="Create New List">+</button>
 
                 <div id="notification" class="hidden"></div>
                 
                 <!-- Movie list -->
                 <ul id="movie-list" class="watchlist"></ul>
 
-                <button id="delete-list-button" type="button" class="hidden" aria-label="Delete List">
-                  -
-                </button>
+                <!-- Delete button -->
+                <button id="delete-list-button" type="button" class="hidden" aria-label="Delete List">-</button>
               </div>
-              
-        </div>
+        </section>
     </div>
-    <script src="./frontend.js"></script>
+
+    <noscript>
+        <p>Please enable JavaScript to use WishFlicks.</p>
+    </noscript>
+    <script src="./frontend.js" defer></script>
 </body>
 </html>

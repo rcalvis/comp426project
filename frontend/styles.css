@@ -38,6 +38,10 @@ body {
   font-family: sans-serif;
 }
 
+.hidden {
+  display: none;
+}
+
 #login {
   color: var(--font-color);
   text-align: center;

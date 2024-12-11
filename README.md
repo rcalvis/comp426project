@@ -28,11 +28,11 @@ Users can update their theme preference by sending a POST request to /update-the
 ### Creating a Movie List:
 
 Users can create a new movie list by sending a POST request to /create-list. If a list already exists for the user, an error message is shown.
-Adding Movies to the List:
+### Adding Movies to the List:
 
 Movies can be added to the list using the /add-movie endpoint. The movie data is validated before adding it to the list, and the movie is saved in the session and database.
 Duplicate movies are prevented from being added to the list, ensuring that no movie appears multiple times.
-Fetching the User’s Movie List:
+### Fetching the User’s Movie List:
 
 The movie list is fetched from the database using the /get-list endpoint, which returns the list in the session for the logged-in user.
 ## 4. Movie Search Functionality

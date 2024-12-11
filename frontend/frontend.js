@@ -265,116 +265,145 @@ createListButton.addEventListener("click", async (e) => {
   }
 });
 
-const themeToggle = document.getElementById("theme-toggle");
-themeToggle.addEventListener("change", async (e) => {
-  const isChecked = e.target.checked;
-  console.log("Checkbox state changed:", isChecked);
+document.addEventListener("DOMContentLoaded", () => {
+  const themeCheckbox = document.getElementById("theme-toggle");
 
-  try {
-    const response = await fetch(`${backendUrl}/update-preference`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ preference: isChecked }),
-      credentials: "include",
-    });
+  // Apply saved theme preference
+  if (localStorage.getItem("theme") === "dark") {
+    document.documentElement.classList.add("dark-mode");
+    themeCheckbox.checked = true;
+  }
 
-    if (response.ok) {
-      console.log("Preference updated successfully");
+  // Toggle theme on checkbox change
+  themeCheckbox.addEventListener("change", () => {
+    if (themeCheckbox.checked) {
+      enableDarkMode();
     } else {
-      console.error("Failed to update preference");
+      enableLightMode();
     }
-  } catch (error) {
-    console.error("Error updating preference:", error);
+  });
+
+  function enableDarkMode() {
+    document.documentElement.classList.add("dark-mode");
+    localStorage.setItem("theme", "dark");
+  }
+
+  function enableLightMode() {
+    document.documentElement.classList.remove("dark-mode");
+    localStorage.setItem("theme", "light");
   }
 });
 
-// Function to toggle theme
-async function toggleTheme(event) {
-  console.log("toggleTheme()");
-  event.preventDefault();
+// const themeToggle = document.getElementById("theme-toggle");
+// themeToggle.addEventListener("change", async (e) => {
+//   const isChecked = e.target.checked;
+//   console.log("Checkbox state changed:", isChecked);
 
-  console.log("Getting if theme light or dark");
-  const theme = document.getElementById("theme-toggle").checked
-    ? "dark"
-    : "light";
+//   try {
+//     const response = await fetch(`${backendUrl}/update-preference`, {
+//       method: "POST",
+//       headers: { "Content-Type": "application/json" },
+//       body: JSON.stringify({ preference: isChecked }),
+//       credentials: "include",
+//     });
 
-  document.body.className = theme; // Apply the theme class to body
-  console.log("Set className to theme");
+//     if (response.ok) {
+//       console.log("Preference updated successfully");
+//     } else {
+//       console.error("Failed to update preference");
+//     }
+//   } catch (error) {
+//     console.error("Error updating preference:", error);
+//   }
+// });
 
-  // Retrieve the logged-in username from sessionStorage
-  const username = sessionStorage.getItem("username");
-  console.log("Retrieved username");
+// // Function to toggle theme
+// async function toggleTheme(event) {
+//   console.log("toggleTheme()");
+//   event.preventDefault();
 
-  if (!username) {
-    console.error("No logged-in username found.");
-    return;
-  }
+//   console.log("Getting if theme light or dark");
+//   const theme = document.getElementById("theme-toggle").checked
+//     ? "dark"
+//     : "light";
 
-  // TODO: BUG
-  try {
-    const response = await fetch(`${backendUrl}/update-theme`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ username, theme }),
-    });
-    if (!response.ok) {
-      console.log("Threw error");
-      throw new Error(`${response.statusText}`);
-    }
-    //return response.json();
-    console.log("Response status for update-theme:", response.status);
-    const data = await response.json();
-    console.log(data.message);
-    console.log("toggleTheme done success");
-  } catch (error) {
-    console.error(error);
-    console.log("toggleTheme done fail");
-  }
+//   document.body.className = theme; // Apply the theme class to body
+//   console.log("Set className to theme");
 
-  // Save the theme in local storage to persist across sessions
-  // okay:
-  localStorage.setItem("theme", theme);
-}
+//   // Retrieve the logged-in username from sessionStorage
+//   const username = sessionStorage.getItem("username");
+//   console.log("Retrieved username");
 
-// On page load, check localStorage or fetch theme from the backend
-window.onload = async function () {
-  // Check if theme is saved in localStorage
-  let savedTheme = localStorage.getItem("theme");
-  console.log("Got window onload savedTheme");
+//   if (!username) {
+//     console.error("No logged-in username found.");
+//     return;
+//   }
 
-  if (!savedTheme) {
-    // If no theme is saved, fetch it from the backend (after user login)
-    const username = sessionStorage.getItem("username"); // Replace with your actual login logic
-    console.log("Get username");
+//   // TODO: BUG
+//   try {
+//     const response = await fetch(`${backendUrl}/update-theme`, {
+//       method: "POST",
+//       headers: {
+//         "Content-Type": "application/json",
+//       },
+//       body: JSON.stringify({ username, theme }),
+//     });
+//     if (!response.ok) {
+//       console.log("Threw error");
+//       throw new Error(`${response.statusText}`);
+//     }
+//     //return response.json();
+//     console.log("Response status for update-theme:", response.status);
+//     const data = await response.json();
+//     console.log(data.message);
+//     console.log("toggleTheme done success");
+//   } catch (error) {
+//     console.error(error);
+//     console.log("toggleTheme done fail");
+//   }
 
-    if (!username) {
-      console.error("No username found");
-      return;
-    }
+//   // Save the theme in local storage to persist across sessions
+//   // okay:
+//   localStorage.setItem("theme", theme);
+// }
 
-    try {
-      const response = await fetch(
-        `${backendUrl}/get-user-theme?username=${username}`
-      );
-      if (response.ok) {
-        const data = await response.json();
-        savedTheme = data.theme || "light"; // Default to light theme if not set
-        localStorage.setItem("theme", savedTheme); // Save to localStorage
-        document.body.className = savedTheme;
-        document.getElementById("theme-toggle").checked = savedTheme === "dark";
-        console.log("changed theme");
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  } else {
-    console.log("Changing theme bc no usernamen");
-    document.body.className = savedTheme;
-    document.getElementById("theme-toggle").checked = savedTheme === "dark";
-  }
-};
+// // On page load, check localStorage or fetch theme from the backend
+// window.onload = async function () {
+//   // Check if theme is saved in localStorage
+//   let savedTheme = localStorage.getItem("theme");
+//   console.log("Got window onload savedTheme");
+
+//   if (!savedTheme) {
+//     // If no theme is saved, fetch it from the backend (after user login)
+//     const username = sessionStorage.getItem("username"); // Replace with your actual login logic
+//     console.log("Get username");
+
+//     if (!username) {
+//       console.error("No username found");
+//       return;
+//     }
+
+//     try {
+//       const response = await fetch(
+//         `${backendUrl}/get-user-theme?username=${username}`
+//       );
+//       if (response.ok) {
+//         const data = await response.json();
+//         savedTheme = data.theme || "light"; // Default to light theme if not set
+//         localStorage.setItem("theme", savedTheme); // Save to localStorage
+//         document.body.className = savedTheme;
+//         document.getElementById("theme-toggle").checked = savedTheme === "dark";
+//         console.log("changed theme");
+//       }
+//     } catch (error) {
+//       console.error(error);
+//     }
+//   } else {
+//     console.log("Changing theme bc no usernamen");
+//     document.body.className = savedTheme;
+//     document.getElementById("theme-toggle").checked = savedTheme === "dark";
+//   }
+// };
 
 // Add movie to list
 async function addMovie(movie) {

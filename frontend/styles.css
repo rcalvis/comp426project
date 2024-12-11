@@ -1,4 +1,4 @@
-/* Default theme (light mode) */
+/* Default light theme */
 :root {
   --background-color: #f0f0f0;
   --font-color: #131720;
@@ -14,22 +14,20 @@
   --header-text-color: #131720;
 }
 
-/* Dark mode */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background-color: #131720;
-    --font-color: #ffffff;
-    --card-bg-color: #1e1e1e;
-    --card-hover-bg-color: #2c2c2c;
-    --button-bg-color: #007bff;
-    --button-hover-bg-color: #0056b3;
-    --input-bg-color: #1e1e1e;
-    --input-border-color: #007bff;
-    --input-focus-border-color: #0056b3;
-    --section-divider-color: rgba(255, 255, 255, 0.2);
-    --header-bg-color: #131720;
-    --header-text-color: #ffffff;
-  }
+/* Dark theme */
+.dark-mode {
+  --background-color: #131720;
+  --font-color: #ffffff;
+  --card-bg-color: #1e1e1e;
+  --card-hover-bg-color: #2c2c2c;
+  --button-bg-color: #007bff;
+  --button-hover-bg-color: #0056b3;
+  --input-bg-color: #1e1e1e;
+  --input-border-color: #007bff;
+  --input-focus-border-color: #0056b3;
+  --section-divider-color: rgba(255, 255, 255, 0.2);
+  --header-bg-color: #131720;
+  --header-text-color: #ffffff;
 }
 
 body {

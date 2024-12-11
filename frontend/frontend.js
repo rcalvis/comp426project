@@ -265,32 +265,88 @@ createListButton.addEventListener("click", async (e) => {
   }
 });
 
-document.addEventListener("DOMContentLoaded", () => {
+window.onload = async function () {
+  console.log("Page Reloaded at:", new Date().toLocaleString());
+
   const themeCheckbox = document.getElementById("theme-toggle");
 
-  // Apply saved theme preference
-  if (localStorage.getItem("theme") === "dark") {
-    document.documentElement.classList.add("dark-mode");
-    themeCheckbox.checked = true;
+  // Retrieve saved theme preference from the backend
+  try {
+    const response = await fetch(`${backendUrl}/get-theme`, {
+      method: "GET",
+      credentials: "include", // Ensure cookies are sent for user identification
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      const savedTheme = data.theme; // Assume the backend returns { theme: "light" or "dark" }
+
+      // Apply the saved theme to the UI
+      if (savedTheme === "dark") {
+        document.body.classList.remove("light");
+        document.body.classList.add("dark");
+        themeCheckbox.checked = true; // Check the toggle for dark mode
+      } else {
+        document.body.classList.remove("dark");
+        document.body.classList.add("light");
+        themeCheckbox.checked = false; // Uncheck the toggle for light mode
+      }
+    } else {
+      console.error("Failed to fetch saved theme. Using default.");
+    }
+  } catch (error) {
+    console.error("Error fetching theme preference:", error);
   }
 
-  // Toggle theme on checkbox change
-  themeCheckbox.addEventListener("change", () => {
-    if (themeCheckbox.checked) {
-      enableDarkMode();
-    } else {
-      enableLightMode();
+  // Listen for theme toggle changes
+  themeCheckbox.addEventListener("change", async (e) => {
+    const username = sessionStorage.getItem("username"); // Assuming the user is logged in
+    const theme = e.target.checked ? "dark" : "light"; // Checked = dark mode
+    document.body.classList.remove("light", "dark");
+    document.body.classList.add(theme);
+
+    try {
+      const response = await fetch("http://localhost:3000/save-theme", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, theme }),
+      });
+
+      if (response.ok) {
+        console.log("Theme preference saved successfully");
+        localStorage.setItem("theme", theme);
+      } else {
+        const data = await response.json();
+        console.error("Error saving theme:", data.error);
+      }
+    } catch (error) {
+      console.error("Error saving theme:", error);
     }
   });
+};
 
-  function enableDarkMode() {
-    document.documentElement.classList.add("dark-mode");
-    localStorage.setItem("theme", "dark");
-  }
+document.addEventListener("DOMContentLoaded", async () => {
+  const username = sessionStorage.getItem("username"); // Assuming the user is logged in
 
-  function enableLightMode() {
-    document.documentElement.classList.remove("dark-mode");
-    localStorage.setItem("theme", "light");
+  if (username) {
+    try {
+      const response = await fetch(
+        `http://localhost:3000/get-theme/${username}`
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        const savedTheme = data.theme;
+
+        document.body.classList.remove("light", "dark");
+        document.body.classList.add(savedTheme);
+        themeCheckbox.checked = savedTheme === "dark";
+      } else {
+        console.log("No theme preference found for this user.");
+      }
+    } catch (error) {
+      console.error("Error fetching theme:", error);
+    }
   }
 });
 

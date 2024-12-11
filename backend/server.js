@@ -32,6 +32,46 @@ app.get("/", (req, res) => {
   res.send("Welcome to the movie app.");
 });
 
+app.post("/save-theme", (req, res) => {
+  const { username, theme } = req.body;
+
+  if (!username || !theme) {
+    return res.status(400).json({ error: "Username and theme are required" });
+  }
+
+  if (!["light", "dark"].includes(theme)) {
+    return res.status(400).json({ error: "Invalid theme value" });
+  }
+
+  db[username] = theme;
+  console.log(`Saved theme preference for user ${username}: ${theme}`);
+
+  return res
+    .status(200)
+    .json({ message: "Theme preference saved successfully" });
+});
+
+// Get user's saved theme preference
+app.get("/get-theme/:username", (req, res) => {
+  const { username } = req.params;
+
+  if (!username) {
+    return res.status(400).json({ error: "Username is required" });
+  }
+
+  const theme = userThemePreferences[username];
+
+  if (!theme) {
+    return res
+      .status(404)
+      .json({ error: "Theme preference not found for this user" });
+  }
+
+  console.log(`Retrieved theme preference for user ${username}: ${theme}`);
+
+  return res.status(200).json({ theme });
+});
+
 // Route to update theme preference
 // app.post("/update-theme", (req, res) => {
 //   try {

@@ -29,6 +29,15 @@
   --header-bg-color: #131720;
   --header-text-color: #ffffff;
 }
+.dark {
+  background-color: #333;
+  color: #fff;
+}
+
+.light {
+  background-color: #fff;
+  color: #000;
+}
 
 body {
   background-color: var(--background-color);
@@ -219,8 +228,4 @@ body {
   text-align: center;
   font-size: 1rem;
   border-radius: 5px;
-}
-
-.hidden {
-  display: none;
 }

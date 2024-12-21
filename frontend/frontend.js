@@ -355,6 +355,9 @@ async function addMovie(movie) {
       console.log("Movie added successfully");
 
       renderMovieList(data.list);
+
+      main.innerHTML = "";
+      main.textContent = "Movie added to list. Search for a movie using the search bar.";
       
       console.log("addMovie() done - success");
     } else {

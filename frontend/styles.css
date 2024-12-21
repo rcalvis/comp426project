@@ -65,6 +65,13 @@ body {
   padding: 20px;
 }
 
+#movie-list {
+  display: grid;
+  /* grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); */
+  gap: 20px;
+  padding: 20px;
+}
+
 .card {
   background-color: var(--card-bg-color);
   border-radius: 10px;
@@ -80,7 +87,7 @@ body {
 }
 
 .thumbnail {
-  width: 100%;
+  width: 20%;
   height: auto;
   object-fit: cover;
   border-bottom: 2px solid var(--font-color);
@@ -228,4 +235,9 @@ body {
   text-align: center;
   font-size: 1rem;
   border-radius: 5px;
+}
+
+ul {
+  display: inline-block;
+  padding: 14px 16px;
 }

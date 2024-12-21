@@ -1,23 +1,26 @@
 const express = require("express");
 const session = require("express-session");
-const cors = require("cors");
 const axios = require("axios");
+// const cors = require("cors");
 const db = require("./db");
+const path = require("path");
 
 const app = express();
+
+app.use(express.static(path.join(__dirname, '../frontend')));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.set("etag", false);
 
-app.use(
-  cors({
-    origin: "http://127.0.0.1:5501",
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE"],
-  })
-);
+// app.use(
+//   cors({
+//     origin: "http://127.0.0.1:5501",
+//     credentials: true,
+//     methods: ["GET", "POST", "PUT", "DELETE"],
+//   })
+// );
 
 app.use(
   session({
@@ -29,7 +32,7 @@ app.use(
 );
 
 app.get("/", (req, res) => {
-  res.send("Welcome to the movie app.");
+  res.sendFile(path.join(__dirname, 'frontend', 'index.html'));
 });
 
 app.post("/save-theme", (req, res) => {
@@ -59,12 +62,11 @@ app.get("/get-theme/:username", (req, res) => {
     return res.status(400).json({ error: "Username is required" });
   }
 
-  const theme = userThemePreferences[username];
+  const theme = db[username];
 
   if (!theme) {
-    return res
-      .status(404)
-      .json({ error: "Theme preference not found for this user" });
+    console.log("Returning default theme bc user not found")
+    return res.status(200).json({ theme: "light" });
   }
 
   console.log(`Retrieved theme preference for user ${username}: ${theme}`);
@@ -72,30 +74,6 @@ app.get("/get-theme/:username", (req, res) => {
   return res.status(200).json({ theme });
 });
 
-// Route to update theme preference
-// app.post("/update-theme", (req, res) => {
-//   try {
-//     const { username, theme } = req.body; // Expecting { username, theme } in the request body
-
-//     console.log("Username:", username);
-//     console.log("Theme:", theme);
-
-//     if (!username || !theme) {
-//       return res.status(400).json({message: "Username and/or theme missing."});
-//     }
-
-//     db.run(`UPDATE users SET theme = ? WHERE username = ?`, [theme, username], function(err) {
-//       if (err) {
-//         return res.status(500).json("Error updating theme");
-//       }
-
-//       res.status(200).json({ message: "Successfully changed theme"});
-//     })
-//   } catch(error) {
-//     console.error(error);
-//     return res.status(500).json("Internal server error");
-//   }
-// });
 app.post("/update-theme", (req, res) => {
   try {
     const { username, theme } = req.body; // Expecting { username, theme } in the request body
@@ -149,6 +127,7 @@ app.get("/get-user-theme", (req, res) => {
 });
 
 app.post("/user-login", (req, res) => {
+  console.log("/user-login started");
   const { username, password } = req.body;
 
   db.get("SELECT * FROM users WHERE username = ?", [username], (err, user) => {
@@ -159,23 +138,22 @@ app.post("/user-login", (req, res) => {
     if (user) {
       if (user.password == password) {
         console.log("Logged back in");
-        req.session.user = { username, list: JSON.parse(user.list || "[]") };
         console.log("User list:", user.list);
         return res.status(200).json({ message: "Successfully logged in" });
       } else {
+        console.log("Unsuccessful login. Password incorrect. Finished /user-login unsuccessfully");
         return res.status(401).json({ message: "Incorrect password" });
       }
     } else {
-      const newUser = { username, password, theme: "light", list: "[]" };
       db.run(
-        `INSERT INTO users (username, password, theme, list) VALUES (?, ?, ?, ?)`,
+        `INSERT INTO users (username, password, theme, list) VALUES(?,?,?,?)`,
         [username, password, "light", "[]"],
-        function (err) {
+        (err) => {
           if (err) {
-            return res.status(500).json("Internal servor error");
+            console.log("New user not added. /user-login completed unsuccessfully");
+            return res.status(500).json("Internal server error");
           }
-
-          req.session.user = { username, list: [] };
+          console.log("New user added. /user-login complete successfully");
           return res.status(201).json({ message: "User successfully created" });
         }
       );
@@ -183,41 +161,23 @@ app.post("/user-login", (req, res) => {
   });
 });
 
-app.get("/get-list", (req, res) => {
-  res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
-  res.setHeader("Pragma", "no-cache");
-  res.setHeader("Expires", "0");
+app.get("/get-list/:username", (req, res) => {
+  const {username} = req.params;
+  console.log("Starting get-list");
 
-  if (!req.session.user) {
-    return res
-      .status(401)
-      .json({ message: "Session expired or user not logged in" });
-  }
-  console.log("User list:", req.session.user.list);
-
-  if (!req.session.user.list) {
-    return res.status(400).json({ message: "No movie list available." });
-  }
-
-  db.get(
-    `SELECT list FROM users WHERE username = ?`,
-    [req.session.user.username],
-    function (err, row) {
-      if (err) {
-        return res.status(500).json("Error getting user list");
-      }
-
-      if (row) {
-        req.session.user.list = JSON.parse(row.list);
-        res.json({ list: req.session.user.list });
-      } else {
-        return res.status(404).json("User not found");
-      }
+  db.get(`SELECT list FROM users WHERE username = ?`,[username],(err, row) => {
+    if (err) return console.error(err.message);
+    if (row) {
+      console.log(row);
+      res.json({ list: JSON.parse(row.list) });
+    } else {
+      return res.status(404).json("User not found");
     }
-  );
+  })
 });
 
 app.get("/search", async (req, res) => {
+  console.log("Starting search");
   const searchQuery = req.query.q;
 
   if (!searchQuery) {
@@ -228,77 +188,56 @@ app.get("/search", async (req, res) => {
     const response = await axios.get(
       `https://imdb.iamidiotareyoutoo.com/search?q=${searchQuery}`
     );
-    res.json(response.data);
+    console.log("Finished search - success");
+    return res.json(response.data);
   } catch (error) {
-    console.error("Error fetching movie data: ", error.message);
+    console.log("Error fetching movie data: ", error.message);
     res.status(500).json({ message: "Error searching for movie" });
   }
 });
 
-app.post("/create-list", (req, res) => {
-  console.log("Session data on create-list:", req.session);
-
-  if (!req.session.user) {
-    return res.status(401).json({ message: "User must be logged in" });
-  }
-
-  if (
-    Array.isArray(req.session.user.list) &&
-    req.session.user.list.length > 0
-  ) {
-    return res.status(400).json({ message: "You already have a list" });
-  }
-
-  req.session.user.list = [];
-  res.status(200).json({ message: "User list created" });
-});
-
-app.get("/popular", (req, res) => {});
-
 app.post("/add-movie", (req, res) => {
+  console.log("Starting add-movie");
   console.log("Session before adding movie:", req.session);
 
-  if (!req.session.user || !req.session.user.list) {
-    return res.status(400).json({ message: "No list found for this user" });
-  }
+  const {movie, username} = req.body;
 
-  const movie = req.body.movie;
+  console.log(movie);
+  console.log(username);
 
-  if (!movie || !movie.id) {
-    return res.status(400).json({ message: "Movie not found" });
-  }
+  let userList = [];
 
-  let movieOnList = req.session.user.list.some(
-    (item) => String(item.id) == String(movie.id)
-  );
-
-  console.log(
-    `Checking if movie with ID ${movie.id} is already in list: ${movieOnList}`
-  );
-
-  if (movieOnList) {
-    return res.status(409).json({ message: "Movie already in list" });
-  }
-
-  req.session.user.list.push(movie);
-
-  const updatedList = JSON.stringify(req.session.user.list);
-
-  const { username } = req.session.user;
-
-  db.run(
-    `UPDATE users SET list = ? WHERE username = ?`,
-    [updatedList, username],
-    function (err) {
-      if (err) {
-        res.status(500).json("Error updating movie list");
-      }
-      res.status(200).json({
-        message: "Movie added to user list",
-        list: req.session.user.list,
-      });
+  db.get(`SELECT list FROM users WHERE username = ?`, [username], function (err, row) {
+    if (err) {
+      return res.status(500).json({message: "Error retrieving user list"});
     }
-  );
+
+    if (row && row.list) {
+      userList = JSON.parse(row.list);
+    }
+
+    let movieOnList = userList.some(
+      (item) => String(item.id) == String(movie.id)
+    );
+  
+    if (movieOnList) {
+      return res.status(400).json({ message: "Movie already in list" });
+    }
+  
+    userList.push(movie);
+  
+    db.run(
+      `UPDATE users SET list = ? WHERE username = ?`,
+      [JSON.stringify(userList), username],
+      function (err) {
+        if (err) {
+          res.status(500).json("Error updating movie list");
+        }
+        console.log("add-movie done - success");
+        return res.status(200).json({message: "Movie added to user list", list: userList});
+      }
+    );
+  })
 });
 
 app.post("/logout", (req, res) => {

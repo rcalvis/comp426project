@@ -149,7 +149,7 @@ app.post("/user-login", (req, res) => {
     } else {
       db.run(
         `INSERT INTO users (username, password, theme, list) VALUES(?,?,?,?)`,
-        [username, password, "light", []],
+        [username, password, "light", "[]"],
         (err) => {
           if (err) {
             console.log(
@@ -176,13 +176,34 @@ app.get("/get-list/:username", (req, res) => {
       if (err) return console.error(err.message);
       if (row) {
         console.log(row);
-        res.json({ list: JSON.parse(row.list) });
+        console.log(row.list);
+        const userList = JSON.parse(row.list || "[]");
+        res.json({ list: userList });
       } else {
         return res.status(404).json("User not found");
       }
     }
   );
 });
+
+// app.get("/get-list/:username", (req, res) => {
+//   const { username } = req.params;
+//   console.log("Starting get-list");
+
+//   db.get(
+//     `SELECT list FROM users WHERE username = ?`,
+//     [username],
+//     (err, row) => {
+//       if (err) return console.error(err.message);
+//       if (row) {
+//         console.log(row);
+//         res.json({ list: JSON.parse(row.list) });
+//       } else {
+//         return res.status(404).json("User not found");
+//       }
+//     }
+//   );
+// });
 
 app.get("/search", async (req, res) => {
   console.log("Starting search");
@@ -265,51 +286,167 @@ app.post("/logout", (req, res) => {
   });
 });
 
-app.delete("/delete-list", (req, res) => {
-  const username = req.session.user;
-  //const { username, password } = req.body;
+app.post("/create-list", (req, res) => {
+  const { username } = req.body;
 
-  db.get("SELECT * FROM users WHERE username = ?", [username], (err, user) => {
-    if (err) {
-      return res.status(500).json({ message: "Error logging in." });
-    }
-    if (user) {
-      if (user.list.length > 0) {
-        db.run(
-          `UPDATE users SET list = ? WHERE username = ?`,
-          [[], user],
-          (err) => {
-            if (err) {
-              console.log("List could not be deleted.");
-              return res.status(500).json("Internal servor error");
-            }
-            console.log("List deleted.");
-            return res.status(201).json({ message: "List deleted." });
-          }
-        );
+  if (!username) {
+    return res.status(400).json({ message: "Username is required." });
+  }
+
+  db.get(
+    "SELECT list FROM users WHERE username = ?",
+    [username],
+    (err, row) => {
+      if (err) {
+        return res.status(500).json({ message: "Error checking user list." });
       }
+
+      if (!row) {
+        return res.status(404).json({ message: "User not found." });
+      }
+
+      const userList = JSON.parse(row.list || "[]");
+
+      if (userList.length > 0) {
+        return res.status(400).json({
+          message:
+            "User already has a watchlist. Feel free to add more movies to your watchlist using the search bar!",
+        });
+      }
+
+      // Create an empty list
+      db.run(
+        "UPDATE users SET list = ? WHERE username = ?",
+        [JSON.stringify([]), username],
+        (err) => {
+          if (err) {
+            return res
+              .status(500)
+              .json({ message: "Error creating list for the user." });
+          }
+          return res
+            .status(201)
+            .json({ message: "List created successfully." });
+        }
+      );
     }
-  });
+  );
 });
 
-app.delete("/delete-movie", (req, res) => {
-  if (!req.session.user || !req.session.user.list) {
-    return res.status(400).json({ message: "No list found for this user" });
+app.delete("/delete-list", (req, res) => {
+  const { username } = req.body;
+
+  if (!username) {
+    return res.status(400).json({ message: "Username is required." });
   }
 
-  const movieID = req.body.id;
+  db.get(
+    "SELECT list FROM users WHERE username = ?",
+    [username],
+    (err, row) => {
+      if (err) {
+        return res.status(500).json({ message: "Error checking user list." });
+      }
 
-  if (!movieID) {
-    return res.status(400).json({ message: "Movie not found" });
-  }
+      if (!row) {
+        return res.status(404).json({ message: "User not found." });
+      }
 
-  req.session.user.list = req.session.user.list.filter(
-    (movie) => movie.id != movieID
+      const userList = JSON.parse(row.list || "[]");
+
+      if (userList.length === 0) {
+        return res
+          .status(400)
+          .json({ message: "No list to delete for this user." });
+      }
+
+      // Delete the list
+      db.run(
+        "UPDATE users SET list = ? WHERE username = ?",
+        [JSON.stringify([]), username],
+        (err) => {
+          if (err) {
+            return res
+              .status(500)
+              .json({ message: "Error deleting list for the user." });
+          }
+          return res
+            .status(200)
+            .json({ message: "List deleted successfully." });
+        }
+      );
+    }
   );
-  res.status(200).json({
-    message: "Movie removed from user list",
-    list: req.session.user.list,
-  });
+});
+
+// app.delete("/delete-account", (req, res) => {
+//   const { username, password } = req.body;
+
+//   if (!username || !password) {
+//     return res
+//       .status(400)
+//       .json({ message: "Username and password are required." });
+//   }
+
+//   db.run("DELETE FROM users WHERE username = ?", [username], (err) => {
+//     if (err) {
+//       return res.status(500).json({ message: "Error deleting account." });
+//     }
+//     res.redirect("/login");
+//     return res.status(200).json({ message: "Account deleted successfully." });
+//   });
+// });
+
+app.delete("/delete-movie", (req, res) => {
+  const { username, movieId } = req.body;
+
+  if (!username || !movieId) {
+    return res
+      .status(400)
+      .json({ message: "Username and movie ID are required." });
+  }
+
+  db.get(
+    "SELECT list FROM users WHERE username = ?",
+    [username],
+    (err, row) => {
+      if (err) {
+        return res.status(500).json({ message: "Error retrieving user list." });
+      }
+
+      if (!row) {
+        return res.status(404).json({ message: "User not found." });
+      }
+
+      const userList = JSON.parse(row.list || "[]");
+      const updatedList = userList.filter(
+        (movie) => String(movie.id) !== String(movieId)
+      );
+
+      if (userList.length === updatedList.length) {
+        return res
+          .status(404)
+          .json({ message: "Movie not found in the list." });
+      }
+
+      db.run(
+        "UPDATE users SET list = ? WHERE username = ?",
+        [JSON.stringify(updatedList), username],
+        (err) => {
+          if (err) {
+            return res
+              .status(500)
+              .json({ message: "Error updating movie list." });
+          }
+
+          return res.status(200).json({
+            message: "Movie removed successfully.",
+            list: updatedList,
+          });
+        }
+      );
+    }
+  );
 });
 
 const PORT = 3000;

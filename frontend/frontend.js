@@ -18,6 +18,7 @@ const theme = window.matchMedia("(prefers-color-scheme: dark)").matches
   ? "dark"
   : "light";
 const deleteListButton = document.getElementById("delete-list-button");
+const deleteAccountButton = document.getElementById("delete-account-button");
 
 // Apply dark or light theme
 document.body.classList.add(theme);
@@ -37,7 +38,11 @@ loginForm.addEventListener("click", async (e) => {
   const password = document.getElementById("password").value;
 
   console.log("Login form submitted");
-
+  if (username.theme == "light") {
+    themeCheckbox.checked = false;
+  } else {
+    themeCheckbox.checked = true;
+  }
   try {
     const response = await fetch(`./user-login`, {
       method: "POST",
@@ -152,16 +157,10 @@ searchForm.addEventListener("submit", (e) => {
 async function renderMovieList(list = null) {
   if (!list) {
     const username = sessionStorage.getItem("username");
-    console.log(
-      "List was null, no list given. Retrieving user list from /get-list."
-    );
     const response = await fetch(`./get-list/${username}`, {
       method: "GET",
       credentials: "include", // Ensure cookies are sent with request
     });
-
-    console.log("Got the response.");
-    console.log("Response status for /get-list:", response.status);
 
     if (!response.ok) {
       console.warn(
@@ -177,7 +176,6 @@ async function renderMovieList(list = null) {
 
     // Check if the response contains the list as an array
     if (Array.isArray(data)) {
-      console.log("Got list");
       list = data;
     } else if (data && Array.isArray(data.list)) {
       // Check for nested structure
@@ -187,7 +185,6 @@ async function renderMovieList(list = null) {
       movieList.innerHTML = "<li>No movies found.</li>";
     }
   }
-  console.log("renderMovieList()");
   movieList.innerHTML = "";
 
   if (!list) {
@@ -197,14 +194,11 @@ async function renderMovieList(list = null) {
 
   // Ensure list is an array
   if (!Array.isArray(list)) {
-    console.log("Wrapping the list");
     list = [list];
   }
 
-  // Proceed with rendering if list is now an array
+  // Proceed with rendering if list is now an array, make each movie have a delete button that removes it from watchlist and database
   list.forEach((movie) => {
-    console.log(movie);
-    console.log("Listing another movie.");
     const li = document.createElement("li");
     li.setAttribute("data-movie-id", movie.id);
     li.style.justifyContent = "space-between";
@@ -219,10 +213,44 @@ async function renderMovieList(list = null) {
       image.setAttribute("class", "thumbnail");
       li.prepend(image);
     }
+
+    const deleteMovieButton = document.createElement("button");
+    deleteMovieButton.textContent = "Delete";
+    deleteMovieButton.classList.add("delete-movie-button");
+    deleteMovieButton.style.marginLeft = "10px";
+
+    deleteMovieButton.addEventListener("click", async (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const movieId = movie.id;
+      const username = sessionStorage.getItem("username");
+
+      const response = await fetch("http://localhost:3000/delete-movie", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username,
+          movieId,
+        }),
+      });
+
+      if (response.ok) {
+        console.log("Movie removed successfully.");
+        // Remove the movie from the DOM
+        li.remove();
+      } else {
+        const data = await response.json();
+        console.error("Error removing movie:", data.message);
+      }
+    });
+
+    li.appendChild(deleteMovieButton);
+
     movieList.appendChild(li);
   });
-
-  // Create new list
 }
 
 // Add event listener for creating a list
@@ -241,7 +269,7 @@ createListButton.addEventListener("click", async (e) => {
         main.textContent = "You already have a watchlist.";
       } else {
         // Call POST method to create a new list
-        const createResponse = await fetch(`./create-list/${username}`, {
+        const createResponse = await fetch(`./create-list`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           credentials: "include",
@@ -250,12 +278,13 @@ createListButton.addEventListener("click", async (e) => {
 
         if (createResponse.ok) {
           main.innerHTML = "";
-          main.textContent = "Watchlist created successfully!";
+          main.textContent =
+            "Let's create your watchlist! All you have to do is search for movies using the search bar, and then click on the movie to add it to your watchlist!";
           await renderMovieList(); // Refresh the list
         } else {
           const errorData = await createResponse.json();
           main.innerHTML = "";
-          main.textContent = `Error creating list: ${errorData.message}`;
+          main.textContent = `${errorData.message}`;
         }
       }
     } else {
@@ -300,7 +329,7 @@ deleteListButton.addEventListener("click", async (e) => {
         } else {
           const errorData = await deleteResponse.json();
           main.innerHTML = "";
-          main.textContent = `Error deleting list: ${errorData.message}`;
+          main.textContent = `${errorData.message}`;
         }
       }
     } else {
@@ -498,5 +527,30 @@ logoutButton.addEventListener("click", async (e) => {
     sessionStorage.clear();
   } catch (error) {
     console.error("Error logging out");
+  }
+  main.innerHTML = "";
+});
+
+deleteAccountButton.addEventListener("click", async (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+
+  const username = sessionStorage.getItem("username");
+
+  const response = await fetch("http://localhost:3000/delete-account", {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      username,
+    }),
+  });
+
+  if (response.ok) {
+    console.log("Account Deleted");
+  } else {
+    const data = await response.json();
+    console.error("Error deleting account", data.message);
   }
 });

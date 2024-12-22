@@ -7,7 +7,7 @@ const path = require("path");
 
 const app = express();
 
-app.use(express.static(path.join(__dirname, '../frontend')));
+app.use(express.static(path.join(__dirname, "../frontend")));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -32,7 +32,7 @@ app.use(
 );
 
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, 'frontend', 'index.html'));
+  res.sendFile(path.join(__dirname, "frontend", "index.html"));
 });
 
 app.post("/save-theme", (req, res) => {
@@ -65,7 +65,7 @@ app.get("/get-theme/:username", (req, res) => {
   const theme = db[username];
 
   if (!theme) {
-    console.log("Returning default theme bc user not found")
+    console.log("Returning default theme bc user not found");
     return res.status(200).json({ theme: "light" });
   }
 
@@ -141,16 +141,20 @@ app.post("/user-login", (req, res) => {
         console.log("User list:", user.list);
         return res.status(200).json({ message: "Successfully logged in" });
       } else {
-        console.log("Unsuccessful login. Password incorrect. Finished /user-login unsuccessfully");
+        console.log(
+          "Unsuccessful login. Password incorrect. Finished /user-login unsuccessfully"
+        );
         return res.status(401).json({ message: "Incorrect password" });
       }
     } else {
       db.run(
         `INSERT INTO users (username, password, theme, list) VALUES(?,?,?,?)`,
-        [username, password, "light", "[]"],
+        [username, password, "light", []],
         (err) => {
           if (err) {
-            console.log("New user not added. /user-login completed unsuccessfully");
+            console.log(
+              "New user not added. /user-login completed unsuccessfully"
+            );
             return res.status(500).json("Internal server error");
           }
           console.log("New user added. /user-login complete successfully");
@@ -162,18 +166,22 @@ app.post("/user-login", (req, res) => {
 });
 
 app.get("/get-list/:username", (req, res) => {
-  const {username} = req.params;
+  const { username } = req.params;
   console.log("Starting get-list");
 
-  db.get(`SELECT list FROM users WHERE username = ?`,[username],(err, row) => {
-    if (err) return console.error(err.message);
-    if (row) {
-      console.log(row);
-      res.json({ list: JSON.parse(row.list) });
-    } else {
-      return res.status(404).json("User not found");
+  db.get(
+    `SELECT list FROM users WHERE username = ?`,
+    [username],
+    (err, row) => {
+      if (err) return console.error(err.message);
+      if (row) {
+        console.log(row);
+        res.json({ list: JSON.parse(row.list) });
+      } else {
+        return res.status(404).json("User not found");
+      }
     }
-  })
+  );
 });
 
 app.get("/search", async (req, res) => {
@@ -200,44 +208,50 @@ app.post("/add-movie", (req, res) => {
   console.log("Starting add-movie");
   console.log("Session before adding movie:", req.session);
 
-  const {movie, username} = req.body;
+  const { movie, username } = req.body;
 
   console.log(movie);
   console.log(username);
 
   let userList = [];
 
-  db.get(`SELECT list FROM users WHERE username = ?`, [username], function (err, row) {
-    if (err) {
-      return res.status(500).json({message: "Error retrieving user list"});
-    }
-
-    if (row && row.list) {
-      userList = JSON.parse(row.list);
-    }
-
-    let movieOnList = userList.some(
-      (item) => String(item.id) == String(movie.id)
-    );
-  
-    if (movieOnList) {
-      return res.status(400).json({ message: "Movie already in list" });
-    }
-  
-    userList.push(movie);
-  
-    db.run(
-      `UPDATE users SET list = ? WHERE username = ?`,
-      [JSON.stringify(userList), username],
-      function (err) {
-        if (err) {
-          res.status(500).json("Error updating movie list");
-        }
-        console.log("add-movie done - success");
-        return res.status(200).json({message: "Movie added to user list", list: userList});
+  db.get(
+    `SELECT list FROM users WHERE username = ?`,
+    [username],
+    function (err, row) {
+      if (err) {
+        return res.status(500).json({ message: "Error retrieving user list" });
       }
-    );
-  })
+
+      if (row && row.list) {
+        userList = JSON.parse(row.list);
+      }
+
+      let movieOnList = userList.some(
+        (item) => String(item.id) == String(movie.id)
+      );
+
+      if (movieOnList) {
+        return res.status(400).json({ message: "Movie already in list" });
+      }
+
+      userList.push(movie);
+
+      db.run(
+        `UPDATE users SET list = ? WHERE username = ?`,
+        [JSON.stringify(userList), username],
+        function (err) {
+          if (err) {
+            res.status(500).json("Error updating movie list");
+          }
+          console.log("add-movie done - success");
+          return res
+            .status(200)
+            .json({ message: "Movie added to user list", list: userList });
+        }
+      );
+    }
+  );
 });
 
 app.post("/logout", (req, res) => {
@@ -248,6 +262,33 @@ app.post("/logout", (req, res) => {
     }
     res.clearCookie("connect.sid");
     res.status(200).json({ message: "Successfully logged out" });
+  });
+});
+
+app.delete("/delete-list", (req, res) => {
+  const username = req.session.user;
+  //const { username, password } = req.body;
+
+  db.get("SELECT * FROM users WHERE username = ?", [username], (err, user) => {
+    if (err) {
+      return res.status(500).json({ message: "Error logging in." });
+    }
+    if (user) {
+      if (user.list.length > 0) {
+        db.run(
+          `UPDATE users SET list = ? WHERE username = ?`,
+          [[], user],
+          (err) => {
+            if (err) {
+              console.log("List could not be deleted.");
+              return res.status(500).json("Internal servor error");
+            }
+            console.log("List deleted.");
+            return res.status(201).json({ message: "List deleted." });
+          }
+        );
+      }
+    }
   });
 });
 

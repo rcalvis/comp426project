@@ -17,13 +17,14 @@ const loginError = document.getElementById("login-error");
 const theme = window.matchMedia("(prefers-color-scheme: dark)").matches
   ? "dark"
   : "light";
+const deleteListButton = document.getElementById("delete-list-button");
 
 // Apply dark or light theme
 document.body.classList.add(theme);
 
-window.onbeforeunload = function() {
+window.onbeforeunload = function () {
   window.onbeforeunload = false;
-}
+};
 
 window.addEventListener("beforeunload", (e) => {
   return null;
@@ -32,7 +33,6 @@ window.addEventListener("beforeunload", (e) => {
 
 // login functionality
 loginForm.addEventListener("click", async (e) => {
-  console.log("LOGIN FORM EVENT LISTENER");
   const username = document.getElementById("username").value;
   const password = document.getElementById("password").value;
 
@@ -70,7 +70,11 @@ loginForm.addEventListener("click", async (e) => {
 
 function returnMovies(url) {
   console.log("returnMovies()");
-  fetch(url, {method: "GET", headers: { "Content-Type": "application/json" }, credentials: "include",})
+  fetch(url, {
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+  })
     .then((res) => {
       return res.json();
     })
@@ -148,7 +152,9 @@ searchForm.addEventListener("submit", (e) => {
 async function renderMovieList(list = null) {
   if (!list) {
     const username = sessionStorage.getItem("username");
-    console.log("List was null, no list given. Retrieving user list from /get-list.")
+    console.log(
+      "List was null, no list given. Retrieving user list from /get-list."
+    );
     const response = await fetch(`./get-list/${username}`, {
       method: "GET",
       credentials: "include", // Ensure cookies are sent with request
@@ -158,18 +164,21 @@ async function renderMovieList(list = null) {
     console.log("Response status for /get-list:", response.status);
 
     if (!response.ok) {
-      console.warn("Error: Unable to fetch data. Status Code:", response.status);
+      console.warn(
+        "Error: Unable to fetch data. Status Code:",
+        response.status
+      );
       return;
     }
 
     const data = await response.json();
 
-    console.log("Render movie got list:",data);
+    console.log("Render movie got list:", data);
 
     // Check if the response contains the list as an array
     if (Array.isArray(data)) {
       console.log("Got list");
-      list = data; 
+      list = data;
     } else if (data && Array.isArray(data.list)) {
       // Check for nested structure
       list = data.list;
@@ -179,7 +188,7 @@ async function renderMovieList(list = null) {
     }
   }
   console.log("renderMovieList()");
-  movieList.innerHTML = ""; 
+  movieList.innerHTML = "";
 
   if (!list) {
     console.warn("Invalid list given.");
@@ -189,7 +198,7 @@ async function renderMovieList(list = null) {
   // Ensure list is an array
   if (!Array.isArray(list)) {
     console.log("Wrapping the list");
-    list = [list]; 
+    list = [list];
   }
 
   // Proceed with rendering if list is now an array
@@ -212,19 +221,104 @@ async function renderMovieList(list = null) {
     }
     movieList.appendChild(li);
   });
-  console.log("renderMovieList() done - success");
+
+  // Create new list
 }
 
+// Add event listener for creating a list
+createListButton.addEventListener("click", async (e) => {
+  try {
+    const username = sessionStorage.getItem("username");
+    const response = await fetch(`./get-list/${username}`, {
+      method: "GET",
+      credentials: "include",
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      if (Array.isArray(data) && data.length > 0) {
+        main.innerHTML = "";
+        main.textContent = "You already have a watchlist.";
+      } else {
+        // Call POST method to create a new list
+        const createResponse = await fetch(`./create-list/${username}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ username }),
+        });
+
+        if (createResponse.ok) {
+          main.innerHTML = "";
+          main.textContent = "Watchlist created successfully!";
+          await renderMovieList(); // Refresh the list
+        } else {
+          const errorData = await createResponse.json();
+          main.innerHTML = "";
+          main.textContent = `Error creating list: ${errorData.message}`;
+        }
+      }
+    } else {
+      console.error("Error fetching list status:", response.status);
+      main.innerHTML = "";
+      main.textContent = "Unable to check watchlist status.";
+    }
+  } catch (error) {
+    console.error("Error creating list:", error);
+    main.innerHTML = "";
+    main.textContent = "An error occurred while creating the list.";
+  }
+});
+
+// Add event listener for deleting a list
+deleteListButton.addEventListener("click", async (e) => {
+  try {
+    const username = sessionStorage.getItem("username");
+    const response = await fetch(`./get-list/${username}`, {
+      method: "GET",
+      credentials: "include",
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      if (Array.isArray(data) && data.length === 0) {
+        main.innerHTML = "";
+        main.textContent = "You do not have a watchlist to delete.";
+      } else {
+        // Call DELETE method to remove the list
+        const deleteResponse = await fetch(`./delete-list`, {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ username }),
+        });
+
+        if (deleteResponse.ok) {
+          main.innerHTML = "";
+          main.textContent = "Watchlist deleted successfully!";
+          await renderMovieList(); // Refresh the list
+        } else {
+          const errorData = await deleteResponse.json();
+          main.innerHTML = "";
+          main.textContent = `Error deleting list: ${errorData.message}`;
+        }
+      }
+    } else {
+      console.error("Error fetching list status:", response.status);
+      main.innerHTML = "";
+      main.textContent = "Unable to check watchlist status.";
+    }
+  } catch (error) {
+    console.error("Error deleting list:", error);
+    main.innerHTML = "";
+    main.textContent = "An error occurred while deleting the list.";
+  }
+});
 window.onerror = function (message, source, lineno, colno, error) {
   console.log(`Error: ${message} at ${source}:${lineno}:${colno}`);
   // prevent the default reload behavior
   return true;
 };
-
-// Create new list
-createListButton.addEventListener("click", async (e) => {
-  console.log("CREATE LIST EVENT BUTTON");
-});
 
 window.onload = async function () {
   console.log("Page Reloaded at:", new Date().toLocaleString());
@@ -288,18 +382,16 @@ window.onload = async function () {
 };
 
 document.addEventListener("DOMContentLoaded", async () => {
-  console.log("DOM CONTENT LOADED EVENT LISTENER")
+  console.log("DOM CONTENT LOADED EVENT LISTENER");
   const username = sessionStorage.getItem("username");
 
   if (username) {
     try {
-      const response = await fetch(
-        `./get-theme/${username}`, {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-        }
-      );
+      const response = await fetch(`./get-theme/${username}`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+      });
 
       if (response.ok) {
         const data = await response.json();
@@ -357,9 +449,8 @@ async function addMovie(movie) {
       renderMovieList(data.list);
 
       main.innerHTML = "";
-      main.textContent = "Movie added to list. Search for a movie using the search bar.";
-      
-      console.log("addMovie() done - success");
+      main.textContent =
+        "Movie added to watchlist. Search for more movies using the search bar.";
     } else {
       console.error("Error: ", data.message);
     }

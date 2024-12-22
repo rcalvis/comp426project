@@ -204,6 +204,25 @@ body {
   border-color: white;
 }
 
+.delete-button {
+  display: block;
+  margin: 0 auto 20px;
+  font-size: 24px;
+  color: var(--font-color);
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.delete-button:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+  border-color: white;
+}
+
 .watchlist {
   list-style: none;
   padding: 0;

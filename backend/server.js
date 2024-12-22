@@ -126,39 +126,82 @@ app.get("/get-user-theme", (req, res) => {
   );
 });
 
+// app.post("/user-login", (req, res) => {
+//   console.log("/user-login started");
+//   const { username, password } = req.body;
+
+//   db.get("SELECT * FROM users WHERE username = ?", [username], (err, user) => {
+//     if (err) {
+//       return res.status(500).json({ message: "Error logging in." });
+//     }
+
+//     if (user) {
+//       if (user.password == password) {
+//         console.log("Logged back in");
+//         console.log("User list:", user.list);
+//         return res.status(200).json({ message: "Successfully logged in" });
+//       } else {
+//         console.log(
+//           "Unsuccessful login. Password incorrect. Finished /user-login unsuccessfully"
+//         );
+//         return res.status(401).json({ message: "Incorrect password" });
+//       }
+//     } else {
+//       db.run(
+//         `INSERT INTO users (username, password, theme, list) VALUES(?,?,?,?)`,
+//         [username, password, "light", "[]"],
+//         (err) => {
+//           if (err) {
+//             console.log(
+//               "New user not added. /user-login completed unsuccessfully"
+//             );
+//             return res.status(500).json("Internal server error");
+//           }
+//           console.log("New user added. /user-login complete successfully");
+//           return res.status(201).json({ message: "User successfully created" });
+//         }
+//       );
+//     }
+//   });
+// });
+
 app.post("/user-login", (req, res) => {
-  console.log("/user-login started");
   const { username, password } = req.body;
 
+  // Check if the username exists in the database
   db.get("SELECT * FROM users WHERE username = ?", [username], (err, user) => {
     if (err) {
       return res.status(500).json({ message: "Error logging in." });
     }
 
+    // If the user exists, check if the password matches
     if (user) {
-      if (user.password == password) {
+      if (user.password === password) {
         console.log("Logged back in");
         console.log("User list:", user.list);
-        return res.status(200).json({ message: "Successfully logged in" });
+        return res.status(200).json({ message: `Welcome back, ${username}!` });
       } else {
-        console.log(
-          "Unsuccessful login. Password incorrect. Finished /user-login unsuccessfully"
-        );
+        console.log("Unsuccessful login. Password incorrect.");
         return res.status(401).json({ message: "Incorrect password" });
       }
     } else {
+      // If the user does not exist, prompt for account creation
+      console.log(`No account found for username ${username}.`);
+
+      // Prompt to create a new account with the given password
       db.run(
         `INSERT INTO users (username, password, theme, list) VALUES(?,?,?,?)`,
         [username, password, "light", "[]"],
         (err) => {
           if (err) {
-            console.log(
-              "New user not added. /user-login completed unsuccessfully"
-            );
-            return res.status(500).json("Internal server error");
+            console.log("Error creating new user.");
+            return res.status(500).json({ message: "Internal server error" });
           }
-          console.log("New user added. /user-login complete successfully");
-          return res.status(201).json({ message: "User successfully created" });
+
+          console.log("New user created successfully.");
+          return res.status(201).json({
+            message: `No account found with the username "${username}". A new account has been created for you.`,
+          });
         }
       );
     }
@@ -378,24 +421,6 @@ app.delete("/delete-list", (req, res) => {
     }
   );
 });
-
-// app.delete("/delete-account", (req, res) => {
-//   const { username, password } = req.body;
-
-//   if (!username || !password) {
-//     return res
-//       .status(400)
-//       .json({ message: "Username and password are required." });
-//   }
-
-//   db.run("DELETE FROM users WHERE username = ?", [username], (err) => {
-//     if (err) {
-//       return res.status(500).json({ message: "Error deleting account." });
-//     }
-//     res.redirect("/login");
-//     return res.status(200).json({ message: "Account deleted successfully." });
-//   });
-// });
 
 app.delete("/delete-movie", (req, res) => {
   const { username, movieId } = req.body;

@@ -18,7 +18,6 @@ const theme = window.matchMedia("(prefers-color-scheme: dark)").matches
   ? "dark"
   : "light";
 const deleteListButton = document.getElementById("delete-list-button");
-const deleteAccountButton = document.getElementById("delete-account-button");
 
 // Apply dark or light theme
 document.body.classList.add(theme);
@@ -37,12 +36,6 @@ loginForm.addEventListener("click", async (e) => {
   const username = document.getElementById("username").value;
   const password = document.getElementById("password").value;
 
-  console.log("Login form submitted");
-  if (username.theme == "light") {
-    themeCheckbox.checked = false;
-  } else {
-    themeCheckbox.checked = true;
-  }
   try {
     const response = await fetch(`./user-login`, {
       method: "POST",
@@ -51,25 +44,22 @@ loginForm.addEventListener("click", async (e) => {
       credentials: "include",
     });
 
-    console.log(response.status);
-
     if (response.ok) {
-      console.log("Logged in");
       const data = await response.json();
+      main.innerHTML = "";
+      main.textContent = data.message;
+
       sessionStorage.setItem("username", username);
       loginSection.style.display = "none";
       mainSection.style.display = "block";
 
       await renderMovieList();
-      console.log("Login Done - success");
     } else {
       const data = await response.json();
       alert(data.message);
-      console.log("Login Done - fail");
     }
   } catch (error) {
     console.error(error);
-    console.log("Login Done - caught error");
   }
 });
 
@@ -529,28 +519,4 @@ logoutButton.addEventListener("click", async (e) => {
     console.error("Error logging out");
   }
   main.innerHTML = "";
-});
-
-deleteAccountButton.addEventListener("click", async (e) => {
-  e.preventDefault();
-  e.stopPropagation();
-
-  const username = sessionStorage.getItem("username");
-
-  const response = await fetch("http://localhost:3000/delete-account", {
-    method: "DELETE",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      username,
-    }),
-  });
-
-  if (response.ok) {
-    console.log("Account Deleted");
-  } else {
-    const data = await response.json();
-    console.error("Error deleting account", data.message);
-  }
 });

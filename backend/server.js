@@ -57,14 +57,9 @@ app.post("/save-theme", (req, res) => {
 // Get user's saved theme preference
 app.get("/get-theme/:username", (req, res) => {
   const { username } = req.params;
-
-  if (!username) {
-    return res.status(400).json({ error: "Username is required" });
-  }
-
   const theme = db[username];
 
-  if (!theme) {
+  if (!username || !theme) {
     console.log("Returning default theme bc user not found");
     return res.status(200).json({ theme: "light" });
   }
@@ -220,7 +215,7 @@ app.get("/get-list/:username", (req, res) => {
       if (row) {
         console.log(row);
         console.log(row.list);
-        const userList = JSON.parse(row.list || "[]");
+        const userList = row.list || "[]";
         res.json({ list: userList });
       } else {
         return res.status(404).json("User not found");
@@ -348,7 +343,7 @@ app.post("/create-list", (req, res) => {
         return res.status(404).json({ message: "User not found." });
       }
 
-      const userList = JSON.parse(row.list || "[]");
+      const userList = row.list || "[]";
 
       if (userList.length > 0) {
         return res.status(400).json({
@@ -395,7 +390,7 @@ app.delete("/delete-list", (req, res) => {
         return res.status(404).json({ message: "User not found." });
       }
 
-      const userList = JSON.parse(row.list || "[]");
+      const userList = row.list || "[]";
 
       if (userList.length === 0) {
         return res

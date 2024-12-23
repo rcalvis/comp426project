@@ -22,19 +22,37 @@ const deleteListButton = document.getElementById("delete-list-button");
 // Apply dark or light theme
 document.body.classList.add(theme);
 
-window.onbeforeunload = function () {
-  window.onbeforeunload = false;
-};
-
-window.addEventListener("beforeunload", (e) => {
-  return null;
-  console.log("beforeunload event triggered at:", new Date().toLocaleString());
-});
-
 // login functionality
 loginForm.addEventListener("click", async (e) => {
   const username = document.getElementById("username").value;
   const password = document.getElementById("password").value;
+
+  try {
+    const response = await fetch(`./get-theme/${username}`, {
+      method: "GET",
+      credentials: "include", // Ensure cookies are sent for user identification
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      const savedTheme = data.theme;
+
+      // Apply the saved theme to the UI
+      if (savedTheme === "dark") {
+        document.body.classList.remove("light");
+        document.body.classList.add("dark");
+        themeCheckbox.checked = true; // Check the toggle for dark mode
+      } else {
+        document.body.classList.remove("dark");
+        document.body.classList.add("light");
+        themeCheckbox.checked = false; // Uncheck the toggle for light mode
+      }
+    } else {
+      console.error("Failed to fetch saved theme. Using default.");
+    }
+  } catch (error) {
+    console.error("Error fetching theme preference:", error);
+  }
 
   try {
     const response = await fetch(`./user-login`, {
@@ -519,4 +537,33 @@ logoutButton.addEventListener("click", async (e) => {
     console.error("Error logging out");
   }
   main.innerHTML = "";
+  sessionStorage.clear();
+  console.log(sessionStorage.getItem("username"));
+
+  try {
+    const response = await fetch(`./get-theme/${username}`, {
+      method: "GET",
+      credentials: "include", // Ensure cookies are sent for user identification
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      const savedTheme = data.theme; // Assume the backend returns { theme: "light" or "dark" }
+
+      // Apply the saved theme to the UI
+      if (savedTheme === "dark") {
+        document.body.classList.remove("light");
+        document.body.classList.add("dark");
+        themeCheckbox.checked = true; // Check the toggle for dark mode
+      } else {
+        document.body.classList.remove("dark");
+        document.body.classList.add("light");
+        themeCheckbox.checked = false; // Uncheck the toggle for light mode
+      }
+    } else {
+      console.error("Failed to fetch saved theme. Using default.");
+    }
+  } catch (error) {
+    console.error("Error fetching theme preference:", error);
+  }
 });

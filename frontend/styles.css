@@ -132,7 +132,7 @@ body {
   border-radius: 5px;
   outline: none;
   font-size: 14px;
-  color: var(--input-border-color);
+  color: #131720;
   background-color: var(--input-bg-color);
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
@@ -189,7 +189,7 @@ body {
   display: block;
   margin: 0 auto 20px;
   font-size: 24px;
-  color: var(--font-color);
+  color: #007bff;
   background-color: rgba(255, 255, 255, 0.1);
   border: 2px solid rgba(255, 255, 255, 0.2);
   border-radius: 50%;
@@ -208,7 +208,7 @@ body {
   display: block;
   margin: 0 auto 20px;
   font-size: 24px;
-  color: var(--font-color);
+  color: #007bff;
   background-color: rgba(255, 255, 255, 0.1);
   border: 2px solid rgba(255, 255, 255, 0.2);
   border-radius: 50%;
@@ -233,13 +233,13 @@ body {
   color: var(--font-color);
   margin: 5px 0;
   padding: 10px;
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(0, 0, 0, 0.05);
   border-radius: 5px;
 }
 
 .placeholder-message {
   font-size: 18px;
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(0, 0, 0, 0.6);
   text-align: center;
   margin-top: 20px;
 }
@@ -250,7 +250,7 @@ body {
 
 #notification {
   padding: 10px;
-  color: var(--font-color);
+  background-color: rgba(0, 0, 0, 0.1);
   text-align: center;
   font-size: 1rem;
   border-radius: 5px;

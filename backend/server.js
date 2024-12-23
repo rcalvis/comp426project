@@ -220,7 +220,8 @@ app.get("/get-list/:username", (req, res) => {
       if (row) {
         console.log(row);
         console.log(row.list);
-        const userList = JSON.parse(row.list || "[]");
+        // const userList = JSON.parse(row.list || "[]");
+        const userList = { row };
         res.json({ list: userList });
       } else {
         return res.status(404).json("User not found");
@@ -348,7 +349,7 @@ app.post("/create-list", (req, res) => {
         return res.status(404).json({ message: "User not found." });
       }
 
-      const userList = JSON.parse(row.list || "[]");
+      const userList = row;
 
       if (userList.length > 0) {
         return res.status(400).json({
@@ -443,7 +444,7 @@ app.delete("/delete-movie", (req, res) => {
         return res.status(404).json({ message: "User not found." });
       }
 
-      const userList = JSON.parse(row.list || "[]");
+      const userList = row;
       const updatedList = userList.filter(
         (movie) => String(movie.id) !== String(movieId)
       );

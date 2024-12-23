@@ -69,35 +69,6 @@ app.get("/get-theme/:username", (req, res) => {
   return res.status(200).json({ theme });
 });
 
-app.post("/update-theme", (req, res) => {
-  try {
-    const { username, theme } = req.body; // Expecting { username, theme } in the request body
-    console.log("Username:", username);
-    console.log("Theme:", theme);
-
-    if (!username || !theme) {
-      return res
-        .status(400)
-        .json({ message: "Username and/or theme missing." });
-    }
-
-    db.run(
-      `UPDATE users SET theme = ? WHERE username = ?`,
-      [theme, username],
-      function (err) {
-        if (err) {
-          return res.status(500).json("Error updating theme");
-        }
-
-        res.status(200).json({ message: "Successfully changed theme" });
-      }
-    );
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json("Internal server error");
-  }
-});
-
 app.get("/get-user-theme", (req, res) => {
   const { username } = req.query;
   if (!username) {
@@ -120,45 +91,6 @@ app.get("/get-user-theme", (req, res) => {
     }
   );
 });
-
-// app.post("/user-login", (req, res) => {
-//   console.log("/user-login started");
-//   const { username, password } = req.body;
-
-//   db.get("SELECT * FROM users WHERE username = ?", [username], (err, user) => {
-//     if (err) {
-//       return res.status(500).json({ message: "Error logging in." });
-//     }
-
-//     if (user) {
-//       if (user.password == password) {
-//         console.log("Logged back in");
-//         console.log("User list:", user.list);
-//         return res.status(200).json({ message: "Successfully logged in" });
-//       } else {
-//         console.log(
-//           "Unsuccessful login. Password incorrect. Finished /user-login unsuccessfully"
-//         );
-//         return res.status(401).json({ message: "Incorrect password" });
-//       }
-//     } else {
-//       db.run(
-//         `INSERT INTO users (username, password, theme, list) VALUES(?,?,?,?)`,
-//         [username, password, "light", "[]"],
-//         (err) => {
-//           if (err) {
-//             console.log(
-//               "New user not added. /user-login completed unsuccessfully"
-//             );
-//             return res.status(500).json("Internal server error");
-//           }
-//           console.log("New user added. /user-login complete successfully");
-//           return res.status(201).json({ message: "User successfully created" });
-//         }
-//       );
-//     }
-//   });
-// });
 
 app.post("/user-login", (req, res) => {
   const { username, password } = req.body;
@@ -215,8 +147,9 @@ app.get("/get-list/:username", (req, res) => {
       if (row) {
         console.log(row);
         console.log(row.list);
+        console.log(typeof(row.list));
 
-        const userList = row.list || "[]";
+        const userList = JSON.parse(row.list) || [];
 
         res.json({ list: userList });
       } else {
@@ -225,25 +158,6 @@ app.get("/get-list/:username", (req, res) => {
     }
   );
 });
-
-// app.get("/get-list/:username", (req, res) => {
-//   const { username } = req.params;
-//   console.log("Starting get-list");
-
-//   db.get(
-//     `SELECT list FROM users WHERE username = ?`,
-//     [username],
-//     (err, row) => {
-//       if (err) return console.error(err.message);
-//       if (row) {
-//         console.log(row);
-//         res.json({ list: JSON.parse(row.list) });
-//       } else {
-//         return res.status(404).json("User not found");
-//       }
-//     }
-//   );
-// });
 
 app.get("/search", async (req, res) => {
   console.log("Starting search");
@@ -346,7 +260,7 @@ app.post("/create-list", (req, res) => {
       }
 
 
-      const userList = row.list || "[]";
+      const userList = JSON.parse(row.list) || [];
 
       if (userList.length > 0) {
         return res.status(400).json({
@@ -392,8 +306,8 @@ app.delete("/delete-list", (req, res) => {
       if (!row) {
         return res.status(404).json({ message: "User not found." });
       }
-
-      const userList = row.list || "[]";
+stringify
+      const userList = JSON.parse(row.list) || [];
 
       if (userList.length === 0) {
         return res
@@ -441,7 +355,7 @@ app.delete("/delete-movie", (req, res) => {
         return res.status(404).json({ message: "User not found." });
       }
 
-      const userList = row;
+      const userList = JSON.parse(row.list);
       const updatedList = userList.filter(
         (movie) => String(movie.id) !== String(movieId)
       );

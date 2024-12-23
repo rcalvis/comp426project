@@ -15,7 +15,7 @@
 }
 
 /* Dark theme */
-.dark-mode {
+.dark {
   --background-color: #131720;
   --font-color: #ffffff;
   --card-bg-color: #1e1e1e;
@@ -28,10 +28,6 @@
   --section-divider-color: rgba(255, 255, 255, 0.2);
   --header-bg-color: #131720;
   --header-text-color: #ffffff;
-}
-.dark {
-  background-color: #333;
-  color: #fff;
 }
 
 .light {

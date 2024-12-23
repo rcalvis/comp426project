@@ -215,12 +215,9 @@ app.get("/get-list/:username", (req, res) => {
       if (row) {
         console.log(row);
         console.log(row.list);
-<<<<<<< HEAD
+
         const userList = row.list || "[]";
-=======
-        // const userList = JSON.parse(row.list || "[]");
-        const userList = { row };
->>>>>>> fb6c8e1ee4c5a1e12a79b1619b8dc5301e5415ae
+
         res.json({ list: userList });
       } else {
         return res.status(404).json("User not found");
@@ -348,11 +345,8 @@ app.post("/create-list", (req, res) => {
         return res.status(404).json({ message: "User not found." });
       }
 
-<<<<<<< HEAD
+
       const userList = row.list || "[]";
-=======
-      const userList = row;
->>>>>>> fb6c8e1ee4c5a1e12a79b1619b8dc5301e5415ae
 
       if (userList.length > 0) {
         return res.status(400).json({

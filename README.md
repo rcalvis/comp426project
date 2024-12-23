@@ -46,17 +46,9 @@ The logout functionality is implemented by sending a POST request to the /logout
 ## Technologies Used
 ### Backend:
 
-Node.js
-Express
-SQLite
-express-session for session management
-CORS for handling cross-origin requests
-Axios for making requests to the external movie API
+Node.js, Express, SQLite, express-session for session management, CORS for handling cross-origin requests, Axios for making requests to the external movie API
 ### Frontend:
 
-HTML
-CSS
-Javascript
-Fetch API for interacting with the backend
+HTML, CSS, Javascript, Fetch API for interacting with the backend
 
 Presentation Video Link: [*INSERT PRESENTATION VIDEO LINK HERE*] 

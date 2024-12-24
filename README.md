@@ -33,7 +33,7 @@ Movies can be added to the list by sending a POST request to the /add-movie endp
 Duplicate movies are prevented from being added to the list, ensuring that no movie appears multiple times.
 ### Deleting Movies from the Watchlist:
 
-Users can remove movies from their list by sending a DELETE request to /delete-movie. The movie is removed from both the session and the database.
+Users can remove movies from their list by clicking the "Remove" button, which sends a DELETE request to /delete-movie. The movie is removed from both the session and the database.
 ### Fetching the User’s Movie List:
 
 The movie list is fetched from the database using the /get-list endpoint, which returns the list in the session for the logged-in user.

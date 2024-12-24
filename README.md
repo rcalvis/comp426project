@@ -56,7 +56,7 @@ The movie list is fetched from the database using the /get-list endpoint, which 
 
 ### Search for Movies:
 
-Users can search for movies by using the search bar. This sends a GET request to the /search endpoint, which sends a search query to an external movie API (based on IMDb) to fetch relevant results. The search results are returned to the frontend, allowing users to add movies to their list by clicking on the movie they want to add.
+Users can search for movies by using the search bar. This sends a GET request to the /search endpoint, which sends a search query to an external movie API (imdb.iamidiotareyoutoo.com/search) to fetch relevant results. The search results are returned to the frontend, allowing users to add movies to their list by clicking on the movie they want to add.
 
 ## 5. User Logout
 
@@ -74,4 +74,4 @@ Node.js, Express, SQLite, express-session for session management, Axios for maki
 
 HTML, CSS, Javascript, Fetch API for interacting with the backend
 
-Presentation Video Link: [*INSERT PRESENTATION VIDEO LINK HERE*]
+Presentation Video Link: [(https://youtu.be/J15_rmoLHMw )] 

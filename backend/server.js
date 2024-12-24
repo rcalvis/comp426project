@@ -69,29 +69,6 @@ app.get("/get-theme/:username", (req, res) => {
   return res.status(200).json({ theme });
 });
 
-app.get("/get-user-theme", (req, res) => {
-  const { username } = req.query;
-  if (!username) {
-    return res.status(400).json({ message: "Username required" });
-  }
-
-  db.get(
-    `SELECT theme FROM users WHERE username = ?`,
-    [username],
-    function (err, row) {
-      if (err) {
-        return res.status(500).json("Internal server error");
-      }
-
-      if (row) {
-        return res.status(200).json({ theme: row.theme });
-      } else {
-        return res.status(404).json({ message: "User not found" });
-      }
-    }
-  );
-});
-
 app.post("/user-login", (req, res) => {
   const { username, password } = req.body;
 
@@ -147,7 +124,7 @@ app.get("/get-list/:username", (req, res) => {
       if (row) {
         console.log(row);
         console.log(row.list);
-        console.log(typeof(row.list));
+        console.log(typeof row.list);
 
         const userList = JSON.parse(row.list) || [];
 
@@ -259,7 +236,6 @@ app.post("/create-list", (req, res) => {
         return res.status(404).json({ message: "User not found." });
       }
 
-
       const userList = JSON.parse(row.list) || [];
 
       if (userList.length > 0) {
@@ -306,7 +282,7 @@ app.delete("/delete-list", (req, res) => {
       if (!row) {
         return res.status(404).json({ message: "User not found." });
       }
-stringify
+      stringify;
       const userList = JSON.parse(row.list) || [];
 
       if (userList.length === 0) {

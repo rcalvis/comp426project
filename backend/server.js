@@ -1,7 +1,6 @@
 const express = require("express");
 const session = require("express-session");
 const axios = require("axios");
-// const cors = require("cors");
 const db = require("./db");
 const path = require("path");
 
@@ -13,14 +12,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.set("etag", false);
-
-// app.use(
-//   cors({
-//     origin: "http://127.0.0.1:5501",
-//     credentials: true,
-//     methods: ["GET", "POST", "PUT", "DELETE"],
-//   })
-// );
 
 app.use(
   session({

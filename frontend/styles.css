@@ -28,6 +28,7 @@
   --section-divider-color: rgba(255, 255, 255, 0.2);
   --header-bg-color: #131720;
   --header-text-color: #ffffff;
+  --input-text-color: #ffffff;
 }
 
 .light {
@@ -91,7 +92,7 @@ body {
   border-radius: 5px;
   outline: none;
   font-size: 14px;
-  color: #131720;
+  color: var(--input-text-color);
   background-color: var(--input-bg-color);
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }

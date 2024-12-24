@@ -609,11 +609,9 @@ async function removeMovie(movieId) {
 
 // Logout functionality
 logoutButton.addEventListener("click", async (e) => {
-  console.log("LOGOUT BUTTON EVENT LISTENER");
   e.preventDefault();
   e.stopPropagation();
   try {
-    console.log("Logout button clicked");
     await fetch(`./logout`, {
       method: "POST",
       credentials: "include",
@@ -624,15 +622,19 @@ logoutButton.addEventListener("click", async (e) => {
       usernameBox.value = "";
       passwordBox.value = "";
     }
-    loginSection.style.display = "block";
-    mainSection.style.display = "none";
     sessionStorage.clear();
+    loginSection.style.display = "flex";
+    loginSection.style.position = "absolute";
+    loginSection.style.top = "50%";
+    loginSection.style.left = "50%";
+    loginSection.style.transform = "translate(-50%, -50%)";
+
+    mainSection.style.display = "none";
   } catch (error) {
     console.error("Error logging out");
   }
   main.innerHTML = "";
   sessionStorage.clear();
-  console.log(sessionStorage.getItem("username"));
 
   try {
     const response = await fetch(`./get-theme/${username}`, {

@@ -45,49 +45,12 @@ body {
   display: none;
 }
 
-#login {
-  color: var(--font-color);
-  text-align: center;
-}
-
-#login-form {
-  text-align: center;
-}
-
 #section {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 20px;
   padding: 20px;
 }
-
-/* #movie-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 20px;
-  padding: 20px;
-} */
-
-/* .card {
-  background-color: var(--card-bg-color);
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  text-align: center;
-  overflow: hidden;
-  transition: transform 0.2s, box-shadow 0.2s;
-} */
-
-/* .card:hover {
-  transform: scale(1.05);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
-} */
-
-/* .thumbnail {
-  width: 20%;
-  height: auto;
-  object-fit: cover;
-  border-bottom: 2px solid var(--font-color);
-} */
 
 .card h3 {
   margin: 10px 0;
@@ -284,6 +247,12 @@ ul {
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
 }
 
+.title {
+  margin-bottom: 20px; /* Add some space below the title */
+  text-align: center; /* Center the title text */
+  color: #007bff;
+}
+
 .thumbnail {
   width: 100%;
   height: auto;
@@ -305,4 +274,76 @@ ul {
 
 .delete-movie-button:hover {
   background-color: var(--button-hover-bg-color);
+}
+
+#login-section {
+  display: flex;
+  flex-direction: column; /* Stack elements vertically */
+  align-items: center; /* Center horizontally */
+  justify-content: center; /* Center vertically */
+  height: 100vh;
+}
+
+#login {
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+  color: var(--button-bg-color);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.login-box {
+  width: 300px; /* Set a width for the login box */
+  padding: 20px;
+  border: 1px solid #ccc; /* Optional styling */
+  border-radius: 8px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* Optional shadow */
+  background-color: #fff; /* Optional background color */
+}
+
+#login-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px; /* Adds space between elements */
+}
+
+#username,
+#password {
+  width: 100%;
+  padding: 10px;
+  border: 2px solid var(--input-border-color);
+  border-radius: 5px;
+  outline: none;
+  font-size: 1rem;
+  background-color: var(--input-bg-color);
+  color: var(--font-color);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  margin-bottom: 15px;
+}
+
+#login-button {
+  width: 100%;
+  padding: 12px;
+  font-size: 1.2rem;
+  background-color: var(--button-bg-color);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s ease;
+}
+
+#login-error {
+  margin-top: 10px;
+  font-size: 0.9rem;
+  color: red;
+  visibility: hidden;
+}
+
+#login-error.show {
+  visibility: visible;
+}
+
+h1 {
+  color: #007bff;
 }

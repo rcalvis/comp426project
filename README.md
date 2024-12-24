@@ -33,7 +33,7 @@ Users can change their theme preference (light or dark) by pressing a button, wh
 
 ### Creating a Watchlist:
 
-Users can create a watchlist by clicking the add button. When this button is clicked, a GET request is sent to /get-list/username. If a watchlist already exists for the user, they won't be able to create a watchlist. If a watchlist does not already exist, a POST request is sent to /create-list and a watchlist is created. They can then add movies to their watchlist by searching and clicking on movies.
+Users can create a watchlist by clicking the add button. When this button is clicked, a GET request is sent to /get-list/username. If a watchlist already exists for the user, they won't be able to create a watchlist. If a watchlist does not already exist, a POST request is sent to /create-list and a watchlist is created. They can then add movies to their watchlist by searching and clicking on movies. If the movie they click is already in their watchlist, it won't let the movie be added again.
 
 ### Deleting a Watchlist:
 

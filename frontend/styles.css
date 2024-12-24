@@ -181,13 +181,14 @@ body {
   margin-bottom: 10px;
 }
 
+/* Add button styles */
 .add-button {
   display: block;
   margin: 0 auto 20px;
   font-size: 24px;
-  color: #007bff;
+  color: #007bff; /* Set text color to blue */
   background-color: rgba(255, 255, 255, 0.1);
-  border: 2px solid rgba(255, 255, 255, 0.2);
+  border: 2px solid #007bff; /* Set border color to blue */
   border-radius: 50%;
   width: 40px;
   height: 40px;
@@ -197,16 +198,18 @@ body {
 
 .add-button:hover {
   background-color: rgba(255, 255, 255, 0.3);
-  border-color: white;
+  transform: scale(1.1); /* Make button bigger on hover */
+  border-color: #0056b3; /* Darker blue border on hover */
 }
 
+/* Delete button styles */
 .delete-button {
   display: block;
   margin: 0 auto 20px;
   font-size: 24px;
-  color: #007bff;
+  color: #007bff; /* Set text color to blue */
   background-color: rgba(255, 255, 255, 0.1);
-  border: 2px solid rgba(255, 255, 255, 0.2);
+  border: 2px solid #007bff; /* Set border color to blue */
   border-radius: 50%;
   width: 40px;
   height: 40px;
@@ -216,7 +219,8 @@ body {
 
 .delete-button:hover {
   background-color: rgba(255, 255, 255, 0.3);
-  border-color: white;
+  transform: scale(1.1); /* Make button bigger on hover */
+  border-color: #0056b3; /* Darker blue border on hover */
 }
 
 .watchlist {

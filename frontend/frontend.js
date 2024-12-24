@@ -160,12 +160,108 @@ searchForm.addEventListener("submit", (e) => {
 });
 
 // Render movie list
+// async function renderMovieList(list = null) {
+//   if (!list) {
+//     const username = sessionStorage.getItem("username");
+//     const response = await fetch(`./get-list/${username}`, {
+//       method: "GET",
+//       credentials: "include", // Ensure cookies are sent with request
+//     });
+
+//     if (!response.ok) {
+//       console.warn(
+//         "Error: Unable to fetch data. Status Code:",
+//         response.status
+//       );
+//       return;
+//     }
+
+//     const data = await response.json();
+
+//     // Check if the response contains the list as an array
+//     if (Array.isArray(data)) {
+//       list = data;
+//     } else if (data && Array.isArray(data.list)) {
+//       // Check for nested structure
+//       list = data.list;
+//     } else {
+//       console.error("No valid list found in the response");
+//       movieList.innerHTML = "<li>No movies found.</li>";
+//     }
+//   }
+//   movieList.innerHTML = "";
+
+//   if (!list) {
+//     console.warn("Invalid list given.");
+//     return;
+//   }
+
+//   // Ensure list is an array
+//   if (!Array.isArray(list)) {
+//     list = [list];
+//   }
+
+//   // Proceed with rendering if list is now an array, make each movie have a delete button that removes it from watchlist and database
+//   list.forEach((movie) => {
+//     const li = document.createElement("li");
+//     li.setAttribute("data-movie-id", movie.id);
+//     li.style.justifyContent = "space-between";
+
+//     const titleText = document.createElement("span");
+//     titleText.textContent = `${movie.title}`;
+//     li.appendChild(titleText);
+
+//     if (movie.poster) {
+//       const image = document.createElement("img");
+//       image.src = movie.poster;
+//       image.setAttribute("class", "thumbnail");
+//       li.prepend(image);
+//     }
+
+//     const deleteMovieButton = document.createElement("button");
+//     deleteMovieButton.textContent = "Delete";
+//     deleteMovieButton.classList.add("delete-movie-button");
+//     deleteMovieButton.style.marginLeft = "10px";
+
+//     deleteMovieButton.addEventListener("click", async (e) => {
+//       e.preventDefault();
+//       e.stopPropagation();
+
+//       const movieId = movie.id;
+//       const username = sessionStorage.getItem("username");
+
+//       const response = await fetch("http://localhost:3000/delete-movie", {
+//         method: "DELETE",
+//         headers: {
+//           "Content-Type": "application/json",
+//         },
+//         body: JSON.stringify({
+//           username,
+//           movieId,
+//         }),
+//       });
+
+//       if (response.ok) {
+//         console.log("Movie removed successfully.");
+//         // Remove the movie from the DOM
+//         li.remove();
+//       } else {
+//         const data = await response.json();
+//         console.error("Error removing movie:", data.message);
+//       }
+//     });
+
+//     li.appendChild(deleteMovieButton);
+
+//     movieList.appendChild(li);
+//   });
+// }
 async function renderMovieList(list = null) {
   if (!list) {
     const username = sessionStorage.getItem("username");
     const response = await fetch(`./get-list/${username}`, {
       method: "GET",
-      credentials: "include", // Ensure cookies are sent with request
+      credentials: "include",
     });
 
     if (!response.ok) {
@@ -178,84 +274,66 @@ async function renderMovieList(list = null) {
 
     const data = await response.json();
 
-    console.log("Render movie got list:", data);
-
-    // Check if the response contains the list as an array
     if (Array.isArray(data)) {
       list = data;
     } else if (data && Array.isArray(data.list)) {
-      // Check for nested structure
       list = data.list;
     } else {
       console.error("No valid list found in the response");
-      movieList.innerHTML = "<li>No movies found.</li>";
+      document.querySelector("#movie-list").innerHTML = `
+        <div class="placeholder-message">No movies found.</div>`;
+      return;
     }
   }
-  movieList.innerHTML = "";
 
-  if (!list) {
-    console.warn("Invalid list given.");
-    return;
-  }
+  const movieListContainer = document.querySelector("#movie-list");
+  movieListContainer.innerHTML = ""; // Clear existing content
 
-  // Ensure list is an array
-  if (!Array.isArray(list)) {
-    list = [list];
-  }
-
-  // Proceed with rendering if list is now an array, make each movie have a delete button that removes it from watchlist and database
   list.forEach((movie) => {
-    const li = document.createElement("li");
-    li.setAttribute("data-movie-id", movie.id);
-    li.style.justifyContent = "space-between";
+    const card = document.createElement("div");
+    card.classList.add("card");
 
-    const titleText = document.createElement("span");
-    titleText.textContent = `${movie.title}`;
-    li.appendChild(titleText);
-
+    // Movie Poster
     if (movie.poster) {
-      const image = document.createElement("img");
-      image.src = movie.poster;
-      image.setAttribute("class", "thumbnail");
-      li.prepend(image);
+      const poster = document.createElement("img");
+      poster.src = movie.poster;
+      poster.alt = `${movie.title} Poster`;
+      poster.classList.add("thumbnail");
+      card.appendChild(poster);
     }
 
-    const deleteMovieButton = document.createElement("button");
-    deleteMovieButton.textContent = "Delete";
-    deleteMovieButton.classList.add("delete-movie-button");
-    deleteMovieButton.style.marginLeft = "10px";
+    // Movie Title
+    const title = document.createElement("h3");
+    title.textContent = movie.title;
+    card.appendChild(title);
 
-    deleteMovieButton.addEventListener("click", async (e) => {
-      e.preventDefault();
-      e.stopPropagation();
+    // Delete Button
+    const deleteButton = document.createElement("button");
+    deleteButton.textContent = "Remove";
+    deleteButton.classList.add("delete-movie-button");
 
-      const movieId = movie.id;
-      const username = sessionStorage.getItem("username");
-
+    deleteButton.addEventListener("click", async () => {
       const response = await fetch("http://localhost:3000/delete-movie", {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          username,
-          movieId,
+          username: sessionStorage.getItem("username"),
+          movieId: movie.id,
         }),
       });
 
       if (response.ok) {
         console.log("Movie removed successfully.");
-        // Remove the movie from the DOM
-        li.remove();
+        card.remove();
       } else {
-        const data = await response.json();
-        console.error("Error removing movie:", data.message);
+        console.error("Failed to remove movie.");
       }
     });
 
-    li.appendChild(deleteMovieButton);
-
-    movieList.appendChild(li);
+    card.appendChild(deleteButton);
+    movieListContainer.appendChild(card);
   });
 }
 
@@ -399,7 +477,6 @@ themeButton.addEventListener("click", async (e) => {
   if (response.ok) {
     const data = await response.json();
     savedTheme = data.theme;
-
   } else {
     console.log("No theme preference found for this user.");
   }
@@ -435,7 +512,6 @@ themeButton.addEventListener("click", async (e) => {
     console.error("Error saving theme:", error);
   }
 });
-
 
 document.addEventListener("DOMContentLoaded", async () => {
   console.log("DOM CONTENT LOADED EVENT LISTENER");

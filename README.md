@@ -1,8 +1,8 @@
-# Movie App README
+# WishFlicks README
 
 ## Overview
 
-This Movie App allows users to log in, save their theme preference (light or dark), create and manage a list of movies to watch, and search for movies using an external movie database API. It is structured using a backend server built with Node.js and Express, utilizing SQLite for session persistent storage. The frontend is a simple HTML, CSS, and JavaScript application that interacts with the backend to provide functionality.
+WishFlicks allows users to log in, save their theme preference (light or dark), create and manage a list of movies to watch, and search for movies using an external movie database API. It is structured using a backend server built with Node.js and Express, utilizing SQLite for session persistent storage. The frontend is a simple HTML, CSS, and JavaScript application that interacts with the backend to provide functionality.
 
 ## Requirements and Features
 
@@ -16,7 +16,7 @@ If the user exists in the database, the app checks whether the password matches.
 
 ### Session Management:
 
-The app uses express-session to maintain user sessions. Each user has a session that includes their username, movie list, and theme preference.
+The app uses express-session to maintain user sessions. Each user has a session that includes their username, watchlist, and theme preference.
 The session persists across requests and is used to track whether the user is logged in. When a user adds a movie to their watchlist, deletes a movie from their watchlist, deletes their list entirely, or changes the theme, this will persist even after the user logs out and then logs back in.
 
 ## 2. Theme Management
@@ -29,7 +29,7 @@ The app allows the retrieval of a user's saved theme preference by sending a GET
 
 Users can change their theme preference (light or dark) by pressing a button, which sends a POST request to /save-theme. This button is only available when a user is logged in.
 
-## 3. Movie List Management
+## 3. Watchlist Management
 
 ### Creating a Watchlist:
 
@@ -48,9 +48,9 @@ Duplicate movies are prevented from being added to the list, ensuring that no mo
 
 Users can remove movies from their list by clicking the "Remove" button, which sends a DELETE request to /delete-movie. The movie is removed from both the session and the database.
 
-### Fetching the User’s Movie List:
+### Fetching the User’s Watchlist:
 
-The movie list is fetched from the database using the /get-list endpoint, which returns the list in the session for the logged-in user.
+The watchlist is fetched from the database using the /get-list endpoint, which returns the list in the session for the logged-in user.
 
 ## 4. Movie Search Functionality
 
